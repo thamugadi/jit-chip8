@@ -35,9 +35,11 @@ void interpret(uint16_t instr)
 {
 
 }
+
 #define memory context.memory
 #define pc context.pc
-#define to_interpret(x) (memory[x] == 0x00E0 || (memory[x] >> 12) >= 0xC)
+#define to_interpret(x) ((memory[x] >> 12) <= 0x5 || (memory[x] >> 12) >= 0xC || memory[x]>>12==9) 
+
 void handle()
 {
 	int n=0;
