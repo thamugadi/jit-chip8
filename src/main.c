@@ -12,7 +12,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 {
 }
 
-void jit_execute(uint8_t* compiled, int size)
+void jit_execute(uint8_t* compiled, int size, int newpc)
 {
         int p = 0;
         uint8_t* code_domain = mmap(0, 0x1000, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -39,14 +39,25 @@ void interpret(uint16_t instr)
 }
 #define memory context.memory
 #define pc context.pc
+#define to_interpret(x) (memory[x] == 0x00E0 || (memory[x] >> 12) >= 0xC)
 void handle()
 {
-        if (memory[pc] == 0x00E0 || (memory[pc] >> 12) >= 0xC)
+	int n=0;
+
+        if (to_interpret(pc))
         {
                 interpret(memory[pc]);
         }
         else
         {
+		while(!to_interpret(pc+n))
+		{
+			n++; // instructions to recompile
+		}
+		struct compiled_s recomp = jit_recompile(&memory[pc], n);
+
+		jit_execute(&recomp.code, recomp.size, recomp.new_pc);
+
                 //give to jit_recompile a reference to memory[pc] with the number of instructions to recompile, being the number of instructions before a JMP, a CALL or an I/O instruction
                 //execute it with jit_execute
         }
