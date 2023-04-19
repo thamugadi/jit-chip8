@@ -1,6 +1,4 @@
 #include <chip8.h>
-
-#define CODE(x) code_domain[p] = x; p++;
 struct context context;
 /*
 void mov_rsp_st(void)

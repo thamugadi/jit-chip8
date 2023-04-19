@@ -10,6 +10,8 @@
 #define USE_Y   8
 #define USE_KK  16
 
+#define CODE(x) code_domain[p] = x; p++;
+
 struct compiled_s
 {
         int size;
