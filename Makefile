@@ -1,2 +1,2 @@
 jit : main.c
-        gcc -masm=intel main.c -o jit
+        gcc -masm=intel src/main.c -o bin/jit
