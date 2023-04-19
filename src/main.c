@@ -45,6 +45,7 @@ void handle()
         if (to_interpret(pc))
         {
                 interpret(memory[pc]);
+		pc++;
         }
         else
         {
