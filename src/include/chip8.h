@@ -10,7 +10,14 @@
 #define USE_Y   8
 #define USE_KK  16
 
-#define CODE(x) code_domain[p] = x; p++;
+extern struct context_s context;
+
+void emulate();
+
+void interpret(uint16_t instr);
+
+struct compiled_s jit_recompile(uint16_t* instr, int n);
+void jit_execute(uint8_t* compiled, int size, int newpc);
 
 struct compiled_s
 {
@@ -19,7 +26,7 @@ struct compiled_s
         uint8_t code[0x100];
 };
 
-struct context
+struct context_s
 {
         uint8_t memory[0x1000];
         uint8_t stack[0x200];
@@ -30,8 +37,7 @@ struct context
         uint16_t I;
 };
 
-
-struct instr
+struct instr_s
 {
         uint16_t opcode;
         char use;
