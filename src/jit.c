@@ -29,7 +29,6 @@ void jit_execute(uint8_t* compiled, int size, int newpc)
 	asm("xor r10, r10");
 
 	asm("mov al, %0" : : "r" (context.sp) : "al");
-        asm("mov dx, %0" : : "r" (context.pc) : "dx");
         asm("mov cx, %0" : : "r" (context.I)  : "cx");
 
 	for (int i = 0; i < 8; i++)
@@ -45,7 +44,6 @@ void jit_execute(uint8_t* compiled, int size, int newpc)
         code();
 	
 	asm("mov %0, al" : "=r" (context.sp) : :);
-	asm("mov %0, dx" : "=r" (context.pc) : :);
         asm("mov %0, cx" : "=r" (context.I)  : :);
 
 	uint64_t tmp;
