@@ -23,7 +23,7 @@ void emulate()
                 }
                 struct compiled_s recomp = jit_recompile(&memory[pc], n);
 
-                jit_execute(&recomp.code, recomp.size, recomp.new_pc);
+                jit_execute(recomp.code, recomp.size, recomp.new_pc);
 
                 //give to jit_recompile a reference to memory[pc] with the number of instructions to recompile, being the number of instructions before a JMP, a CALL or an I/O instruction
                 //execute it with jit_execute

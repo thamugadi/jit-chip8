@@ -23,12 +23,12 @@ struct compiled_s
 {
         int size;
         uint16_t new_pc;
-        uint8_t code[0x100];
+        uint8_t* code;
 };
 
 struct context_s
 {
-        uint8_t memory[0x1000];
+        uint16_t memory[0x1000];
         uint8_t stack[0x200];
 
         uint8_t sp; // in ``rax``
@@ -44,9 +44,9 @@ struct instr_s
 
         char name[4];
 
-        uint16_t nnn;
-        uint8_t n;
-        uint8_t x;
-        uint8_t y;
-        uint8_t kk;
+        uint64_t nnn; //12
+        uint64_t n; //4
+        uint64_t x; //4
+        uint64_t y; //4
+        uint64_t kk; //8
 };
