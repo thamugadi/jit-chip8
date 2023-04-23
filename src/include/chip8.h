@@ -33,7 +33,7 @@ struct context_s
 
         uint8_t sp; // in ``rax``
         uint16_t pc; 
-        uint64_t V[16]; // in ``r9`` and ``r10``
+        uint8_t V[16]; // in ``r9`` and ``r10``
         uint16_t I; // in ``rcx``
 };
 
