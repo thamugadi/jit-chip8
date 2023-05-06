@@ -26,8 +26,9 @@ void emulate()
 
                 jit_execute(recomp.code, recomp.size, recomp.new_pc);
 
-                //give to jit_recompile a reference to memory[pc] with the number of instructions to recompile, being the number of instructions before a JMP, a CALL or an I/O instruction
+                //give to jit_recompile a reference to memory[pc] with the number of instructions to recompile
                 //execute it with jit_execute
         }
+	// handle interrupts
 }
 
