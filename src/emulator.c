@@ -22,6 +22,7 @@ void emulate()
                         n++; // instructions to recompile
                 }
                 struct compiled_s recomp = jit_recompile(&memory[pc], n);
+		//add to cache (todo)
 
                 jit_execute(recomp.code, recomp.size, recomp.new_pc);
 
