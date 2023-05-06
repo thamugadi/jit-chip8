@@ -10,7 +10,7 @@
 #define MOV_REG_BYTE(reg, byte) \
 	if (reg < 8) \
 	{ \
-		X64(0xB0 | reg2mov(reg)); \
+		X64(0xB0 | reg_t1[reg]); \
 		X64(byte); \
 	} \
 	else\
@@ -28,7 +28,7 @@
 	} \
 	else if (reg < 8) \
 	{ \
-		X64(0x80); X64(0xC0 | reg2mov(reg)); \
+		X64(0x80); X64(0xC0 | reg_t1[reg]); \
 		X64(byte); \
 	} \
 	else if (byte < 0x80) \
@@ -48,22 +48,15 @@
 #define MOV_REG_REG(reg1, reg2) \
 	if (reg1 < 8 && reg2 < 8) \
 	{ \
+		X64(0x88); \
+		X64(0xC0 | (reg_t1[reg2] << 3) | reg_t1[reg1]); \
 	} \
+	else if (reg1 >= 8 && reg2 >= 8) \
+	{ \
+		X64(0x4D); X64(0x89); \
+		X64(0xC0 | (reg2 - 8) | (reg1 - 8)); \
+	} 
 
-uint8_t reg2mov(uint8_t x)
-{
-	switch(x)
-	{
-		case 0: return 0; break;
-                case 1: return 4; break;
-                case 2: return 3; break;
-                case 3: return 7; break;
-                case 4: return 1; break;
-                case 5: return 5; break;
-                case 6: return 2; break;
-                case 7: return 6; break;
-	}
-}
 uint8_t reg_t1[] = {0,4,3,7,1,5,2,6};
 
 struct compiled_s jit_recompile(uint16_t* instr, int n)
@@ -168,6 +161,7 @@ void jit_execute(uint8_t* compiled, int size, int newpc)
 
 	context.pc = newpc;
 
-	munmap(code_domain, size);
+//	todo: cache code_domain
+//	munmap(code_domain, size);
 }
 

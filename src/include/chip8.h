@@ -33,10 +33,10 @@ struct context_s
         uint16_t memory[0x1000];
         uint8_t stack[0x200];
 
-        uint8_t sp; // in ``rax``
+        uint8_t sp; 
         uint16_t pc; 
-        uint8_t V[16]; // in ``r9`` and ``r10``
-        uint16_t I; // in ``rcx``
+        uint8_t V[16]; 
+        uint16_t I; 
 };
 
 struct instr_s
