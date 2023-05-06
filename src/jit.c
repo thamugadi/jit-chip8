@@ -45,6 +45,11 @@
 		X64(0x00); X64(0x00); X64(0x00); \
 	}
 
+#define MOV_REG_REG(reg1, reg2) \
+	if (reg1 < 8 && reg2 < 8) \
+	{ \
+	} \
+
 uint8_t reg2mov(uint8_t x)
 {
 	switch(x)
@@ -59,10 +64,11 @@ uint8_t reg2mov(uint8_t x)
                 case 7: return 6; break;
 	}
 }
+uint8_t reg_t1[] = {0,4,3,7,1,5,2,6};
 
 struct compiled_s jit_recompile(uint16_t* instr, int n)
 {
-	uint8_t* code = malloc(n*32);
+	uint8_t* code = malloc(n*MAX_INSTR_SIZE);
 	int source_i;
 	int dest_i=0;
 
@@ -84,6 +90,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		{
 			ADD_REG_BYTE(ins.x, ins.kk);
 		}
+
 	}
 }
 
@@ -125,7 +132,6 @@ void jit_execute(uint8_t* compiled, int size, int newpc)
 
 	asm("mov rsi, %0" : : "r" ((uint64_t)context.I) : "rsi");
 
-	printf("AAAAAAAAAAAAAAAAAA");
         void (*f)() = code_domain;
         f();
 
