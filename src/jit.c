@@ -179,6 +179,26 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		}
                 else if (instr[source_i] & 0xF000 == 0xC000) // RND Vx, byte
 		{
+			// mov rax, 0x13e
+			X64(0x48); X64(0xc7); X64(0xc0);
+			X64(0x3e); X64(0x01); X64(0x00);
+			X64(0x00);
+			// mov rdi, &context.V[ins.x]
+			X64(0x48); X64(0xbf);
+			EMIT_64LE(&context.V[ins.x]);
+			// mov rsi, 1
+			X64(0x48); X64(0xc7); X64(0xc6);
+			X64(0x01); X64(0x00); X64(0x00);
+			X64(0x00);
+			// syscall
+			X64(0x0f); X64(0x05);
+			// mov al, byte ptr [&ins.kk]
+                        MOV_AL_BYTE_PTR(&ins.kk);
+			// and byte ptr [&context.V[ins.x]], al
+                        X64(0x20); X64(0x05);
+                        EMIT_32LE(&context.V[ins.x]);
+
+			emitted_instr = 40;
 		}
 
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x15)
