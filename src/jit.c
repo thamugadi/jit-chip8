@@ -168,6 +168,14 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 
                 else if (instr[source_i] & 0xF000 == 0xA000) // LD I, addr
 		{
+			// mov al, byte ptr [&ins.nnn]
+			MOV_AL_BYTE_PTR(&ins.nnn);
+
+                        // mov byte ptr [&context.I], al
+                        X64(0x88); X64(0x05);
+                        EMIT_32LE(&context.I);
+
+                        emitted_instr = 15;
 		}
                 else if (instr[source_i] & 0xF000 == 0xC000) // RND Vx, byte
 		{
