@@ -105,12 +105,35 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 1)
 		{ // OR Vx, Vy
+			// mov al, byte ptr [&context.V[ins.y]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.y]);
+			// or byte ptr [&context.V[ins.x]], al
+                        X64(0x08); X64(0x05);
+                        EMIT_32LE(&context.V[ins.x]);
+
+			emitted_instr = 15;
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 2)
 		{ // AND Vx, Vy
+                        // mov al, byte ptr [&context.V[ins.y]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.y]);
+			// and byte ptr [&context.V[ins.x]], al
+                        X64(0x20); X64(0x05);
+                        EMIT_32LE(&context.V[ins.x]);
+                        
+                        emitted_instr = 15;
+
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 3)
 		{ // XOR Vx, Vy
+			// mov al, byte ptr [&context.V[ins.y]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.y]);
+			// xor byte ptr [&context.V[ins.x]], al
+                        X64(0x30); X64(0x05);
+                        EMIT_32LE(&context.V[ins.x]);
+                        
+                        emitted_instr = 15;
+
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
                 { // ADD Vx, Vy
@@ -144,9 +167,6 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		}
 
                 else if (instr[source_i] & 0xF000 == 0xA000) // LD I, addr
-		{
-		}
-		else if (instr[source_i] & 0xF000 == 0xB000) // JP V0, addr
 		{
 		}
                 else if (instr[source_i] & 0xF000 == 0xC000) // RND Vx, byte
