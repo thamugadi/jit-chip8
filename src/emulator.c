@@ -2,7 +2,9 @@
 
 #define memory context.memory
 #define pc context.pc
-#define to_interpret(x) ((memory[x] >> 12) <= 0x5 || (memory[x] >> 12) >= 0xC || memory[x]>>12==9) 
+#define to_interpret(x) ((memory[x] >> 12) <= 0x2 || (memory[x] >> 12) == 0xB || memory[x]>>12==0xC || memory[x]>>12==0xD || to_interpret_f(x))
+
+#define to_interpret_f(x) ((memory[x] >> 12) == 0xF && (memory[x] & 0x00F0))
 
 struct context_s context;
 
