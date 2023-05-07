@@ -94,8 +94,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		}
 
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0)
-		// LD Vx, Vy
-		{
+		{ // LD Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// mov byte ptr [&context.V[ins.x]], al
@@ -104,7 +103,77 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 
 			emitted_instr = 15;
 		}
+		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 1)
+		{ // OR Vx, Vy
+		}
+		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 2)
+		{ // AND Vx, Vy
+		}
+		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 3)
+		{ // XOR Vx, Vy
+                }
+                else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
+                { // ADD Vx, Vy
+                }
+                else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 5)
+                { // SUB Vx, Vy
+                }
+                else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 6)
+                { // SHR Vx {, Vy}
+                }
+                else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 7)
+                { // SUBN Vx, Vy
+                }
+                else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0xE)
+                { // SHL Vx {, Vy}
+                }
 
+		else if (instr[source_i] & 0xF000 == 0x9000) // SNE Vx, Vy
+		{
+                        // mov al, byte ptr [&context.V[ins.x]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.x])
+                        // cmp al, byte ptr [&context.V[ins.y]]
+                        CMP_AL_BYTE_PTR(&context.V[ins.y]);
+                        // jne 0 (placeholder)
+                        X64(0x75);
+                        X64(0); 
+
+
+                        emitted_instr = 17;
+                        fix_skip = 1;
+		}
+
+                else if (instr[source_i] & 0xF000 == 0xA000) // LD I, addr
+		{
+		}
+		else if (instr[source_i] & 0xF000 == 0xB000) // JP V0, addr
+		{
+		}
+                else if (instr[source_i] & 0xF000 == 0xC000) // RND Vx, byte
+		{
+		}
+
+		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x15)
+		{ // LD DT, Vx
+		}
+		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x18)
+		{ // LD ST, Vx
+		}
+                else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x1E)
+                { // ADD I, Vx 
+                }                                  
+                else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x29)
+                { // LD F, Vx
+                }                                  
+                else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x33)
+                { // LD B, Vx
+                }                                  
+                else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x55)
+                { // LD [I], Vx
+                }                                  
+                else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x65)
+                { // LD Vx, [I]
+                }                                  
 
 		if (fix_skip == 1) fix_skip++;
 		else if (fix_skip == 2)
