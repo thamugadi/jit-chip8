@@ -137,9 +137,21 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
                 { // ADD Vx, Vy
+			// mov byte ptr [&context.V[15]], 0
+			// mov al, byte ptr [&context.V[ins.y]]
+			// add byte ptr [&context.V[ins.x]], al
+			// jnc 7 (size of next instr)
+			// add byte ptr [&context.V[15]], 1
+			emitted_instr = 31;
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 5)
                 { // SUB Vx, Vy
+			// mov byte ptr [&context.V[15]], 0
+			// mov al, byte ptr [&context.V[ins.y]]
+			// cmp byte ptr [&context.V[ins.x]], al
+			// jng 7 (size of next instr)
+			// add byte ptr [&context.V[15]], 1
+			emitted_instr = 31;
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 6)
                 { // SHR Vx {, Vy}
@@ -224,7 +236,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
                 }                                  
 
 		if (fix_skip == 1) fix_skip++;
-		else if (fix_skip == 2)
+		else if (fix_skip == 2 && emitted_instr < 0x80)
 		{
 			code[dest_i - emitted_instr - 1] = emitted_instr; // fixing jump
 			fix_skip = 0;
