@@ -7,10 +7,11 @@
 
 #define X64(a) code[dest_i++] = a;
 
-#define MOV_AL_BYTE_PTR(a) X64(0xa0); EMIT_64LE(a); //9
-#define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0xff); EMIT_32LE(a); //6
 #define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4;
 #define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8;
+
+#define MOV_AL_BYTE_PTR(a) X64(0xa0); EMIT_64LE(a); //9
+#define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0xff); EMIT_32LE(a); //6
 
 struct compiled_s jit_recompile(uint16_t* instr, int n)
 {
@@ -31,7 +32,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		ins.y = (instr[source_i] & 0x00F0) >> 4;
                 ins.kk = instr[source_i] & 0x00FF;
 
-		if (instr[source_i] & 0xF000 = 0x3000) // SE Vx, byte
+		if (instr[source_i] & 0xF000 == 0x3000) // SE Vx, byte
 		{
 			// mov al, byte ptr [&ins.kk]
 			MOV_AL_BYTE_PTR(&ins.kk);
@@ -44,7 +45,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 			emitted_instr = 17;
 			fix_skip = 1;
 		}
-		else if (instr[source_i] & 0xF000 = 0x4000) // SNE Vx, byte
+		else if (instr[source_i] & 0xF000 == 0x4000) // SNE Vx, byte
                 {
                         // mov al, byte ptr [&ins.kk]
                         MOV_AL_BYTE_PTR(&ins.kk);
@@ -57,7 +58,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
                         emitted_instr = 17;
                         fix_skip = 1;
                 }
-		else if (instr[source_i] & 0xF000 = 0x5000) // SE Vx, Vy
+		else if (instr[source_i] & 0xF000 == 0x5000) // SE Vx, Vy
 		{
 			// mov al, byte ptr [&context.V[ins.x]]
 			MOV_AL_BYTE_PTR(&context.V[ins.x])
@@ -75,7 +76,7 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 		{
 			// mov al, byte ptr [&ins.kk]
                         MOV_AL_BYTE_PTR(&ins.kk);
-			// mov byte ptr [&context.V[ins.n]], al
+			// mov byte ptr [&context.V[ins.x]], al
 			X64(0x88); X64(0x05);
 			EMIT_32LE(&context.V[ins.x]);
 
@@ -90,6 +91,18 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
                         EMIT_32LE(&context.V[ins.x]);
 
                         emitted_instr = 15;
+		}
+
+		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0)
+		// LD Vx, Vy
+		{
+			// mov al, byte ptr [&context.V[ins.y]]
+			MOV_AL_BYTE_PTR(&context.V[ins.y]);
+			// mov byte ptr [&context.V[ins.x]], al
+                        X64(0x88); X64(0x05);
+                        EMIT_32LE(&context.V[ins.x]);
+
+			emitted_instr = 15;
 		}
 
 
