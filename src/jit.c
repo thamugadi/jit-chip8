@@ -15,7 +15,7 @@
 
 struct compiled_s jit_recompile(uint16_t* instr, int n)
 {
-	uint8_t* code = malloc(n*MAX_INSTR_SIZE);
+	uint8_t* code = malloc(n*MAX_EMITTED);
 	int source_i;
 	int dest_i=0;
 

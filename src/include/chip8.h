@@ -10,7 +10,7 @@
 #define USE_Y   8
 #define USE_KK  16
 
-#define MAX_INSTR_SIZE 32
+#define MAX_EMITTED 24 
 
 extern struct context_s context;
 
