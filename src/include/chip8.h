@@ -46,9 +46,9 @@ struct instr_s
 
         char name[4];
 
-        uint64_t nnn; //12
-        uint64_t n; //4
-        uint64_t x; //4
-        uint64_t y; //4
-        uint64_t kk; //8
+        uint16_t nnn; //12
+        uint8_t n; //4
+        uint8_t x; //4
+        uint8_t y; //4
+        uint8_t kk; //8
 };
