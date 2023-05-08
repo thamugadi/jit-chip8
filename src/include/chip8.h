@@ -37,6 +37,13 @@ struct context_s
         uint16_t pc; 
         uint8_t V[16]; 
         uint16_t I; 
+
+	uint8_t gfx[64*32];
+	
+	uint8_t dt;
+	uint8_t st;
+
+	uint8_t keys[16];
 };
 
 struct instr_s
