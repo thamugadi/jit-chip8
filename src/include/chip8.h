@@ -4,12 +4,6 @@
 #include <sys/mman.h>
 #include <string.h>
 
-#define USE_NNN 1
-#define USE_N   2
-#define USE_X   4
-#define USE_Y   8
-#define USE_KK  16
-
 #define MAX_EMITTED 40 
 
 #define CACHE_SIZE 8 
@@ -20,6 +14,9 @@
 
 extern void initGL();
 extern void display();
+
+extern void keyboardUp(uint8_t key, int x, int y);
+extern void keyboardDown(uint8_t key, int x, int y);
 
 extern struct context_s context;
 extern uint64_t recompiled_instr;
@@ -44,10 +41,11 @@ struct context_s
 
         uint8_t sp; 
         uint16_t pc; 
+
         uint8_t V[16]; 
         uint16_t I; 
 
-	uint8_t gfx[64*32];
+	uint8_t gfx[64][32];
 	
 	uint8_t dt;
 	uint8_t st;

@@ -13,7 +13,16 @@ void display()
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
-	// draw
+	for (int i = 0; i < WIDTH; i++)
+	{
+		for (int j = 0; j < HEIGHT; j++)
+		{
+			if (context.gfx[i][j])
+			{
+				DRAW_POS(i, j);
+			}
+		}
+	}
 	glEnd();
 
 	glutSwapBuffers();

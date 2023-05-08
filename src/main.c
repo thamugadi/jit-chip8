@@ -13,7 +13,8 @@ int main(int argc, char** argv)
 	initGL();
 
 	//glutDisplayFunc(display);
-	//glutKeyboardFunc(keyboard);
+	//glutKeyboardFunc(keyboardDown);
+    	//glutKeyboardUpFunc(keyboardUp);
 
 	//glutMainLoop();
 }
