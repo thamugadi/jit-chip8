@@ -7,7 +7,6 @@
 #define X64(a) code[dest_i++] = a; emitted_instr++;
 
 #define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4; emitted_instr+=4;
-#define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8; emitted_instr+=8;
 
 #define MOV_AL_BYTE_PTR(a) X64(0x8a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 #define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
