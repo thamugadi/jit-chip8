@@ -1,15 +1,11 @@
+#include <chip8.h>
 #include <GL/glut.h>
-
-int width = 64;
-int height = 32;
-int pixelSize = 1;
 
 #define DRAW_POS(px,py) \
         glVertex2i(px, py); \
-        glVertex2i(px+pixelSize, py); \
-        glVertex2i(px+pixelSize, py+pixelSize); \
-        glVertex2i(px, py+pixelSize);
-
+        glVertex2i(px+PIXELSIZE, py); \
+        glVertex2i(px+PIXELSIZE, py+PIXELSIZE); \
+        glVertex2i(px, py+PIXELSIZE);
 
 void display()
 {
@@ -25,6 +21,6 @@ void display()
 
 void initGL()
 {
-	gluOrtho2D(0, width * pixelSize, 0, height * pixelSize);
+	gluOrtho2D(0, WIDTH * PIXELSIZE, 0, HEIGHT * PIXELSIZE);
 	glMatrixMode(GL_MODELVIEW);
 }

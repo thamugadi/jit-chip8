@@ -14,6 +14,12 @@
 
 #define CACHE_SIZE 8 
 
+#define WIDTH 64
+#define HEIGHT 32
+#define PIXELSIZE 1
+
+extern void initGL();
+
 extern struct context_s context;
 extern uint64_t recompiled_instr;
 
