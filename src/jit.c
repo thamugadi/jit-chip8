@@ -240,9 +240,30 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0x9E)
 		{ // SKP Vx
+			// mov al, byte ptr [&context.keys[ins.x]]
+			MOV_AL_BYTE_PTR(&context.keys[ins.x]);
+			// cmp al, 1
+			X64(0x3c); X64(0x01);
+			// je 0 (placeholder)
+			X64(0x74);
+			X64(0);
+
+                        emitted_instr = 13;
+                        fix_skip = 1;
+
 		}
 		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0xA1)
 		{ // SKNP Vx
+                        // mov al, byte ptr [&context.keys[ins.x]]
+                        MOV_AL_BYTE_PTR(&context.keys[ins.x]);
+                        // cmp al, 0              
+                        X64(0x3c); X64(0x00);
+                        // je 0 (placeholder)
+                        X64(0x74);
+                        X64(0);
+                	
+                        emitted_instr = 13;
+                        fix_skip = 1;
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x07)
 		{ // LD Vx, DT
