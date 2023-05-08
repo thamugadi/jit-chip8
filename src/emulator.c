@@ -1,18 +1,12 @@
 #include <chip8.h>
 
-#include <pthread.h>
-#include <unistd.h>
-#include <time.h>
-
 #define to_interpret(x) ((context.memory[x] == 0x00EE) || (context.memory[x] >> 12 == 1) || (context.memory[x] >> 12 == 2) || (context.memory[x] >> 12) == 0xB) // RET, JP, CALL
-
-#define INTERVAL_MS 16 // Approximately 60Hz (1000ms / 60 = 16.6667ms)
 
 struct context_s context;
 
 uint64_t recompiled_instr = 0;
 
-void emulate()
+void emulate_basic_block()
 {
 	struct access_cache_s cache_a;
 
@@ -33,6 +27,9 @@ void emulate()
 		{
 			n = cache_a.n;
 			recomp = cache_a.addr;
+
+			void (*f)() = recomp;
+			f();
 		}
 		else
 		{

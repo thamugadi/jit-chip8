@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
 	if (bytes_read == 0x800 && !feof(file)) 
 	{
-        	fprintf(stderr, "Error: ROM is too huge. \n");
+        	fprintf(stderr, "Error: File size is larger than 0x800. \n");
         	fclose(file);
 		return 3;
 	}

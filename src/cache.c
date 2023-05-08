@@ -30,15 +30,12 @@ struct access_cache_s access_cache(uint16_t pc_addr)
 {
         for (int i = 0; i < CACHE_SIZE; i++)
         {
-                if (cache[i].pc == pc_addr)
+                if (cache[i].pc == pc_addr) // hit
                 {
                         cache[i].freq++;
                         return (struct access_cache_s){1, cache[i].n, cache[i].addr}; 
                 }
-                else
-                {
-                        return (struct access_cache_s){0,0,0};
-                }
         }
+	return (struct access_cache_s){0,0,0};
 }
 
