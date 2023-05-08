@@ -12,9 +12,9 @@ int main(int argc, char** argv)
 
 	initGL();
 
-	//glutDisplayFunc(display);
-	//glutKeyboardFunc(keyboardDown);
-    	//glutKeyboardUpFunc(keyboardUp);
+	glutDisplayFunc(display);
+	glutKeyboardFunc(keyboardDown);
+    	glutKeyboardUpFunc(keyboardUp);
 
-	//glutMainLoop();
+	glutMainLoop();
 }
