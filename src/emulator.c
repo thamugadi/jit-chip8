@@ -12,22 +12,8 @@ struct context_s context;
 
 uint64_t recompiled_instr = 0;
 
-void* incr()
-{
-	struct timespec interval = {0, INTERVAL_MS * 1000000L}; // ms to ns
-	while(1)
-	{
-		nanosleep(&interval, 0);
-		context.dt++;
-	}
-	return 0;
-}
-
 void emulate()
 {
-	pthread_t incr_thread;
-    	pthread_create(&incr_thread, NULL, incr, NULL);
-	
 	struct access_cache_s cache_a;
 
 	uint8_t* recomp;

@@ -34,6 +34,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 ins.x = (instr[source_i] & 0x0F00) >> 8;
 		ins.y = (instr[source_i] & 0x00F0) >> 4;
                 ins.kk = instr[source_i] & 0x00FF;
+
 		if (instr[source_i] == 0x00E0) // CLS
 		{
 		}
