@@ -21,6 +21,7 @@ void update_cache(uint8_t* addr, int n, uint16_t pc)
                                 index = i;
                         }
                 }
+		munmap(cache[index].addr, (cache[index].n) * MAX_EMITTED);
                 cache[index] = (struct cache_entry){addr, pc, 0, n};
         }
 }
