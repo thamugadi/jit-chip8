@@ -4,13 +4,14 @@
 		   X64((uint8_t)(n&0xff)) X64((uint8_t)(n>>8)&0xff) \
 		   X64((uint8_t)(n>>16)&0xff) X64(0x00);
 
-#define X64(a) code[dest_i++] = a;
+#define X64(a) code[dest_i++] = a; emitted_instr++;
 
-#define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4;
-#define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8;
+#define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4; emitted_instr+=4;
+#define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8; emitted_instr+=8;
 
-#define MOV_AL_BYTE_PTR(a) X64(0xa0); EMIT_64LE(a); //9
-#define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0xff); EMIT_32LE(a); //6
+#define MOV_AL_BYTE_PTR(a) X64(0x8a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
+#define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
+
 
 uint8_t* jit_recompile(uint16_t* instr, int n)
 {
@@ -19,16 +20,19 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 	int source_i;
 	int dest_i = 0;
 
-	int emitted_instr = 0;
 	int fix_skip = 0;
 
 	struct instr_s ins;
+
+	int emitted_instr = 0;
 
         X64(0x55); //push rbp
         X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
 
 	for (source_i = 0; source_i < n; source_i++)
 	{
+		emitted_instr = 0;
+
 		ins.nnn = instr[source_i] & 0xFFF;
 		ins.n = instr[source_i] & 0xF;
                 ins.x = (instr[source_i] & 0x0F00) >> 8;
@@ -52,8 +56,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			X64(0x08); X64(0x00); X64(0x00);
 			// jne -17 (previous 3 instr)
 			X64(0x75); X64(17);
-
-			emitted_instr = 25;
 		}
 		else if (instr[source_i] & 0xF000 == 0x3000) // SE Vx, byte
 		{
@@ -65,7 +67,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			X64(0x74);
 			X64(0); 
 
-			emitted_instr = 17;
 			fix_skip = 1;
 		}
 		else if (instr[source_i] & 0xF000 == 0x4000) // SNE Vx, byte
@@ -78,7 +79,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                         X64(0x75);
                         X64(0);
 
-                        emitted_instr = 17;
                         fix_skip = 1;
                 }
 		else if (instr[source_i] & 0xF000 == 0x5000) // SE Vx, Vy
@@ -91,9 +91,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			X64(0x74);
 			X64(0); 
 
-			emitted_instr = 17;
 			fix_skip = 1;
-
 		}
 		else if (instr[source_i] & 0xF000 == 0x6000) // LD Vx, byte
 		{
@@ -102,8 +100,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov byte ptr [&context.V[ins.x]], al
 			X64(0x88); X64(0x05);
 			EMIT_32LE(&context.V[ins.x]);
-
-			emitted_instr = 15;
 		}
 		else if (instr[source_i] & 0xF000 == 0x7000) // ADD Vx, byte
 		{
@@ -112,8 +108,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// add byte ptr [&context.V[ins.x]], al
                         X64(0x00); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-
-                        emitted_instr = 15;
 		}
 
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0)
@@ -123,8 +117,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov byte ptr [&context.V[ins.x]], al
                         X64(0x88); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-
-			emitted_instr = 15;
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 1)
 		{ // OR Vx, Vy
@@ -133,8 +125,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// or byte ptr [&context.V[ins.x]], al
                         X64(0x08); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-
-			emitted_instr = 15;
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 2)
 		{ // AND Vx, Vy
@@ -143,9 +133,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// and byte ptr [&context.V[ins.x]], al
                         X64(0x20); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-                        
-                        emitted_instr = 15;
-
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 3)
 		{ // XOR Vx, Vy
@@ -154,9 +141,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// xor byte ptr [&context.V[ins.x]], al
                         X64(0x30); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-                        
-                        emitted_instr = 15;
-
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
                 { // ADD Vx, Vy
@@ -177,7 +161,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// add byte ptr [&context.V[15]], bl
 			X64(0x00); X64(0x1d);
 			EMIT_32LE(&context.V[15]);
-			emitted_instr = 33;
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 5)
                 { // SUB Vx, Vy
@@ -210,8 +193,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                         X64(0x75);
                         X64(0); 
 
-
-                        emitted_instr = 17;
                         fix_skip = 1;
 		}
 
@@ -223,8 +204,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                         // mov byte ptr [&context.I], al
                         X64(0x88); X64(0x05);
                         EMIT_32LE(&context.I);
-
-                        emitted_instr = 15;
 		}
                 else if (instr[source_i] & 0xF000 == 0xC000) // RND Vx, byte
 		{
@@ -246,8 +225,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// and byte ptr [&context.V[ins.x]], al
                         X64(0x20); X64(0x05);
                         EMIT_32LE(&context.V[ins.x]);
-
-			emitted_instr = 40;
 		}
 		else if ((instr[source_i] & 0xF000) == 0xD000)
 		{ // DRW Vx, Vy, n
@@ -262,9 +239,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			X64(0x74);
 			X64(0);
 
-                        emitted_instr = 13;
                         fix_skip = 1;
-
 		}
 		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0xA1)
 		{ // SKNP Vx
@@ -276,7 +251,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                         X64(0x74);
                         X64(0);
                 	
-                        emitted_instr = 13;
                         fix_skip = 1;
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x07)
@@ -291,7 +265,6 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x18)
 		{ // LD ST, Vx
 			// no sound yet
-			emitted_instr = 0;
 		}
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x1E)
                 { // ADD I, Vx 
