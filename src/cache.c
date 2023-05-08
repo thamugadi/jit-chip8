@@ -4,9 +4,9 @@ struct cache_entry cache[CACHE_SIZE];
 
 void update_cache(uint8_t* addr, int n, uint16_t pc)
 {
-        if (recompiled_instr < CACHE_SIZE)
+        if (recompiled_block < CACHE_SIZE)
         {
-                cache[recompiled_instr] = (struct cache_entry){addr, pc, 0, n};
+                cache[recompiled_block] = (struct cache_entry){addr, pc, 0, n};
         }
         else
         {

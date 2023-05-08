@@ -37,6 +37,23 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 
 		if (instr[source_i] == 0x00E0) // CLS
 		{
+			// xor rax, rax
+			X64(0x48); X64(0x31); X64(0xc0);
+			// xor rbx, rbx
+                        X64(0x48); X64(0x31); X64(0xdb);
+			// mov qword [rax+&context.gfx], rbx
+			X64(0x48); X64(0x89); X64(0x98);
+			EMIT_32LE(&context.gfx);
+			// add rax, 8
+			X64(0x48); X64(0x83); X64(0xc0);
+			X64(0x08);
+			// cmp rax, 0x800
+			X64(0x48); X64(0x3d); X64(0x00); 
+			X64(0x08); X64(0x00); X64(0x00);
+			// jne -17 (previous 3 instr)
+			X64(0x75); X64(17);
+
+			emitted_instr = 25;
 		}
 		else if (instr[source_i] & 0xF000 == 0x3000) // SE Vx, byte
 		{
@@ -238,6 +255,8 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x18)
 		{ // LD ST, Vx
+			// no sound yet
+			emitted_instr = 0;
 		}
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x1E)
                 { // ADD I, Vx 
@@ -256,7 +275,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 }                                  
 
 		if (fix_skip == 1) fix_skip++;
-		else if (fix_skip == 2 && emitted_instr < 0x80)
+		else if (fix_skip == 2)
 		{
 			code[dest_i - emitted_instr - 1] = emitted_instr; // fixing jump
 			fix_skip = 0;

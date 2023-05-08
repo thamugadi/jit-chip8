@@ -19,7 +19,7 @@ extern void keyboardUp(uint8_t key, int x, int y);
 extern void keyboardDown(uint8_t key, int x, int y);
 
 extern struct context_s context;
-extern uint64_t recompiled_instr;
+extern uint64_t recompiled_block;
 
 void emulate_basic_block();
 

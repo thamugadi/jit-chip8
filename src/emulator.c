@@ -4,7 +4,7 @@
 
 struct context_s context;
 
-uint64_t recompiled_instr = 0;
+uint64_t recompiled_block = 0;
 
 void emulate_basic_block()
 {
@@ -42,7 +42,7 @@ void emulate_basic_block()
                         f();
 		}
 		
-		recompiled_instr++;
+		recompiled_block++;
 		update_cache(recomp, n, context.pc);
 		context.pc += n;
         }
