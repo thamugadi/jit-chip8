@@ -31,8 +31,10 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
                 ins.x = (instr[source_i] & 0x0F00) >> 8;
 		ins.y = (instr[source_i] & 0x00F0) >> 4;
                 ins.kk = instr[source_i] & 0x00FF;
-
-		if (instr[source_i] & 0xF000 == 0x3000) // SE Vx, byte
+		if (instr[source_i] == 0x00E0) // CLS
+		{
+		}
+		else if (instr[source_i] & 0xF000 == 0x3000) // SE Vx, byte
 		{
 			// mov al, byte ptr [&ins.kk]
 			MOV_AL_BYTE_PTR(&ins.kk);
@@ -212,7 +214,21 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 
 			emitted_instr = 40;
 		}
-
+		else if ((instr[source_i] & 0xF000) == 0xD000)
+		{ // DRW Vx, Vy, n
+		}
+		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0x9E)
+		{ // SKP Vx
+		}
+		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0xA1)
+		{ // SKNP Vx
+		}
+		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x07)
+		{ // LD Vx, DT
+		}
+		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x0A)
+		{ // LD Vx, K
+		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x15)
 		{ // LD DT, Vx
 		}
