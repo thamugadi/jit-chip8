@@ -27,6 +27,9 @@ void emulate()
 {
 	pthread_t incr_thread;
     	pthread_create(&incr_thread, NULL, incr, NULL);
+	
+	struct compiled_s recomp;
+
         int n=0;
 
         if (to_interpret(pc))
@@ -36,18 +39,23 @@ void emulate()
         }
         else
         {
-                while(!to_interpret(pc+n))
-                {
-                        n++; // instructions to recompile
-                }
-                struct compiled_s recomp = jit_recompile(&memory[pc], n);
+		access_cache_s cache_a = access_cache(pc);
+		if (cache_a.present)
+		{
+			n = cache_a.n;
+			recomp = cache_a.addr;
+		}
+		else
+		{
+                	while(!to_interpret(pc+n))
+                	{
+                        	n++; // instructions to recompile
+                	}
+                	recomp = jit_recompile(&memory[pc], n);
+		}
+		pc+=n;
 		//add to cache (todo)
-
                 jit_execute(recomp.code, recomp.size, recomp.new_pc);
-
-                //give to jit_recompile a reference to memory[pc] with the number of instructions to recompile
-                //execute it with jit_execute
         }
-	// handle interrupts
 }
 
