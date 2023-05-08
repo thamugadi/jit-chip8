@@ -19,6 +19,7 @@
 #define PIXELSIZE 1
 
 extern void initGL();
+extern void display();
 
 extern struct context_s context;
 extern uint64_t recompiled_instr;
