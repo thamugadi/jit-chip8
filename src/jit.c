@@ -1,9 +1,8 @@
 #include <chip8.h>
 
-#define CODE(a) code_domain[p++] = a;
-#define __SUB_RSP(n) CODE(0x48) CODE(0x81) CODE(0xEC) \
-		   CODE((uint8_t)(n&0xff)) CODE((uint8_t)(n>>8)&0xff) \
-		   CODE((uint8_t)(n>>16)&0xff) CODE(0x00);
+#define __SUB_RSP(n) X64(0x48) X64(0x81) X64(0xEC) \
+		   X64((uint8_t)(n&0xff)) X64((uint8_t)(n>>8)&0xff) \
+		   X64((uint8_t)(n>>16)&0xff) X64(0x00);
 
 #define X64(a) code[dest_i++] = a;
 
@@ -13,16 +12,20 @@
 #define MOV_AL_BYTE_PTR(a) X64(0xa0); EMIT_64LE(a); //9
 #define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0xff); EMIT_32LE(a); //6
 
-struct compiled_s jit_recompile(uint16_t* instr, int n)
+uint8_t* jit_recompile(uint16_t* instr, int n)
 {
-	uint8_t* code = malloc(n*MAX_EMITTED);
+	uint8_t* code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
 	int source_i;
-	int dest_i=0;
+	int dest_i = 0;
 
 	int emitted_instr = 0;
 	int fix_skip = 0;
 
 	struct instr_s ins;
+
+        X64(0x55); //push rbp
+        X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
 
 	for (source_i = 0; source_i < n; source_i++)
 	{
@@ -257,30 +260,12 @@ struct compiled_s jit_recompile(uint16_t* instr, int n)
 			code[dest_i - emitted_instr - 1] = emitted_instr; // fixing jump
 			fix_skip = 0;
 		}
-
 	}
-}
 
-void jit_execute(uint8_t* compiled, int size, int newpc)
-{
-        int p = 0;
-        uint8_t* code_domain = mmap(0, size, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        CODE(0x55); //push rbp
-        CODE(0x48); CODE(0x89); CODE(0xE5); //mov rsp, rbp
+        X64(0xC9); X64(0xC3); // leave; ret
 
-	//__SUB_RSP(0x100)
-
-        for (int i = 0; i < size; i++)
-        {
-                CODE(compiled[i]);
-        }
-
-        CODE(0xC9); CODE(0xC3); // leave; ret
-
-        void (*f)() = code_domain;
+        void (*f)() = code;
         f();
 
-//	todo: cache code_domain
-//	munmap(code_domain, size);
+	return code;
 }
-

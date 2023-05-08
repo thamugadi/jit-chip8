@@ -4,14 +4,13 @@
 #include <unistd.h>
 #include <time.h>
 
-#define memory context.memory
-#define pc context.pc
-
-#define to_interpret(x) ((memory[x] == 0x00EE) || (memory[x] >> 12 == 1) || (memory[x] >> 12 == 2) || (memory[x] >> 12) == 0xB) // RET, JP, CALL
+#define to_interpret(x) ((context.memory[x] == 0x00EE) || (context.memory[x] >> 12 == 1) || (context.memory[x] >> 12 == 2) || (context.memory[x] >> 12) == 0xB) // RET, JP, CALL
 
 #define INTERVAL_MS 16 // Approximately 60Hz (1000ms / 60 = 16.6667ms)
 
 struct context_s context;
+
+uint64_t recompiled_instr = 0;
 
 void* incr()
 {
@@ -23,23 +22,27 @@ void* incr()
 	}
 	return 0;
 }
+
 void emulate()
 {
 	pthread_t incr_thread;
     	pthread_create(&incr_thread, NULL, incr, NULL);
 	
-	struct compiled_s recomp;
+	struct access_cache_s cache_a;
+
+	uint8_t* recomp;
 
         int n=0;
 
-        if (to_interpret(pc))
+        if (to_interpret(context.pc))
         {
-                interpret(memory[pc]);
-                pc++;
+                interpret(context.memory[context.pc]);
+                context.pc++;
         }
+
         else
         {
-		access_cache_s cache_a = access_cache(pc);
+		cache_a = access_cache(context.pc);
 		if (cache_a.present)
 		{
 			n = cache_a.n;
@@ -47,15 +50,16 @@ void emulate()
 		}
 		else
 		{
-                	while(!to_interpret(pc+n))
+                	while(!to_interpret(context.pc+n))
                 	{
                         	n++; // instructions to recompile
                 	}
-                	recomp = jit_recompile(&memory[pc], n);
+                	recomp = jit_recompile(&context.memory[context.pc], n);
 		}
-		pc+=n;
-		//add to cache (todo)
-                jit_execute(recomp.code, recomp.size, recomp.new_pc);
+		
+		recompiled_instr++;
+		update_cache(recomp, n, context.pc);
+		context.pc += n;
         }
 }
 

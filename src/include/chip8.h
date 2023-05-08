@@ -12,14 +12,16 @@
 
 #define MAX_EMITTED 40 
 
+#define CACHE_SIZE 8 
+
 extern struct context_s context;
+extern uint64_t recompiled_instr;
 
 void emulate();
 
 void interpret(uint16_t instr);
 
-struct compiled_s jit_recompile(uint16_t* instr, int n);
-void jit_execute(uint8_t* compiled, int size, int newpc);
+uint8_t* jit_recompile(uint16_t* instr, int n);
 
 struct compiled_s
 {
@@ -59,3 +61,22 @@ struct instr_s
         uint8_t y; //4
         uint8_t kk; //8
 };
+
+struct cache_entry
+{
+	uint8_t* addr;
+	uint16_t pc;
+	uint64_t freq;
+	uint64_t n;
+};
+
+struct access_cache_s
+{
+	int present;
+	int n;
+	uint8_t* addr;
+};
+
+struct access_cache_s access_cache(uint16_t pc);
+
+void update_cache(uint8_t* addr, int n, uint16_t pc);
