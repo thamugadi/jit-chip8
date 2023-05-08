@@ -5,4 +5,4 @@ clean:
 	rm -rf bin
 
 run:
-	./bin/jit-chip8
+	./bin/jit-chip8 test

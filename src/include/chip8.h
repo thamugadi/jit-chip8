@@ -37,7 +37,7 @@ struct compiled_s
 struct context_s
 {
         uint16_t memory[0x1000];
-        uint8_t stack[0x200];
+        uint16_t stack[0x10];
 
         uint8_t sp; 
         uint16_t pc; 
