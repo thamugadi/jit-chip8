@@ -265,8 +265,5 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 
         X64(0xC9); X64(0xC3); // leave; ret
 
-        void (*f)() = code;
-        f();
-
 	return code;
 }

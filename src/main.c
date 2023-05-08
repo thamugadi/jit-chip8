@@ -53,4 +53,9 @@ int main(int argc, char** argv)
     	glutKeyboardUpFunc(keyboardUp);
 
 	glutMainLoop();
+
+	while(1)
+	{
+		emulate_basic_block();
+	}
 }

@@ -38,6 +38,8 @@ void emulate_basic_block()
                         	n++; // instructions to recompile
                 	}
                 	recomp = jit_recompile(&context.memory[context.pc], n);
+                        void (*f)() = recomp;
+                        f();
 		}
 		
 		recompiled_instr++;

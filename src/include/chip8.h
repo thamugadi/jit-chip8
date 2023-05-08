@@ -21,7 +21,7 @@ extern void keyboardDown(uint8_t key, int x, int y);
 extern struct context_s context;
 extern uint64_t recompiled_instr;
 
-void emulate();
+void emulate_basic_block();
 
 void interpret(uint16_t instr);
 
