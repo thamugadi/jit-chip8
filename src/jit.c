@@ -12,7 +12,6 @@
 #define MOV_AL_BYTE_PTR(a) X64(0x8a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 #define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 
-
 uint8_t* jit_recompile(uint16_t* instr, int n)
 {
 	uint8_t* code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -98,7 +97,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&ins.kk]
                         MOV_AL_BYTE_PTR(&ins.kk);
 			// mov byte ptr [&context.V[ins.x]], al
-			X64(0x88); X64(0x05);
+			X64(0x88); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
 		}
 		else if (instr[source_i] & 0xF000 == 0x7000) // ADD Vx, byte
@@ -106,7 +105,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&ins.kk]
                         MOV_AL_BYTE_PTR(&ins.kk);
 			// add byte ptr [&context.V[ins.x]], al
-                        X64(0x00); X64(0x05);
+                        X64(0x00); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 
@@ -115,7 +114,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// mov byte ptr [&context.V[ins.x]], al
-                        X64(0x88); X64(0x05);
+                        X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 1)
@@ -123,7 +122,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// or byte ptr [&context.V[ins.x]], al
-                        X64(0x08); X64(0x05);
+                        X64(0x08); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 2)
@@ -131,7 +130,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                         // mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// and byte ptr [&context.V[ins.x]], al
-                        X64(0x20); X64(0x05);
+                        X64(0x20); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 		else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 3)
@@ -139,7 +138,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// xor byte ptr [&context.V[ins.x]], al
-                        X64(0x30); X64(0x05);
+                        X64(0x30); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
@@ -147,12 +146,12 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov bl, 0
 			X64(0xb3); X64(0x00);
 			// mov byte ptr [&context.V[15]], bl
-			X64(0x88); X64(0x1d);
+			X64(0x88); X64(0x1c); X64(0x25);
 			EMIT_32LE(&context.V[15]);
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// add byte ptr [&context.V[ins.x]], al
-			X64(0x00); X64(0x05);
+			X64(0x00); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
 			// jnc 9 (size of next)
 			X64(0x73); X64(9);
@@ -167,7 +166,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		  	// mov bl, 0
 			X64(0xb3); X64(0x00);
 			// mov byte ptr [&context.V[15]], bl 
-                        X64(0x88); X64(0x1d);
+                        X64(0x88); X64(0x1c); X64(0x25);
                         EMIT_32LE(&context.V[15]);
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -232,7 +231,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 			// mov al, byte ptr [&ins.kk]
                         MOV_AL_BYTE_PTR(&ins.kk);
 			// and byte ptr [&context.V[ins.x]], al
-                        X64(0x20); X64(0x05);
+                        X64(0x20); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 		else if ((instr[source_i] & 0xF000) == 0xD000)
