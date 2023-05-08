@@ -31,14 +31,15 @@ int main(int argc, char** argv)
 	// todo: init chip-8
 
 	context.sp = 0;
-	context.pc = 0;
-	for (int i = 0; i < 16; i++) context.V[i] = 0;
+	context.pc = 0x200;
 	context.I = 0;
 	context.dt = 0;
 	context.st = 0;
-	for (int i = 0; i < 64; i++) for (int j = 0; j < 32; j++) context.gfx[i][j] = 0;
-	for (int i = 0; i < 16; i++) context.stack[i] = 0;
 
+	memset(context.V, 0, 16);
+	memset(context.gfx, 0, WIDTH * HEIGHT);
+	memset(context.stack, 0, 2 * 16);
+	memset(context.keys, 0, 16);
 	// todo: load ROM
 
 	glutInit(&argc, argv);
