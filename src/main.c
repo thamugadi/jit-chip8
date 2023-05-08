@@ -28,8 +28,6 @@ int main(int argc, char** argv)
 
 	fclose(file);
 
-	// todo: init chip-8
-
 	context.sp = 0;
 	context.pc = 0x200;
 	context.I = 0;
@@ -40,7 +38,6 @@ int main(int argc, char** argv)
 	memset(context.gfx, 0, WIDTH * HEIGHT);
 	memset(context.stack, 0, 2 * 16);
 	memset(context.keys, 0, 16);
-	// todo: load ROM
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);

@@ -24,6 +24,11 @@ void display()
 		}
 	}
 	glEnd();
+	
+	if (context.dt)
+	{
+		context.dt--;
+	}
 
 	glutSwapBuffers();
 }
