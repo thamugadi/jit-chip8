@@ -319,12 +319,22 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x07)
 		{ // LD Vx, DT
+			// mov al, byte ptr [&context.dt]
+			MOV_AL_BYTE_PTR(&context.dt);
+                        // mov byte ptr [&context.V[ins.x]], al 
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.V[ins.x]);
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x0A)
 		{ // LD Vx, K
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x15)
 		{ // LD DT, Vx
+                        // mov al, byte ptr [&context.V[ins.x]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.x]);                                      
+                        // mov byte ptr [&context.dt], al 
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.dt);
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x18)
 		{ // LD ST, Vx
@@ -345,6 +355,11 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x65)
                 { // LD Vx, [I]
                 }                                  
+		else
+		{
+			printf("unsupported opcode.\n");
+			exit(0);
+		}
 
 		if (fix_skip == 1) fix_skip++;
 		else if (fix_skip == 2)

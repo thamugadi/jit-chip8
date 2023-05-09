@@ -31,6 +31,7 @@ void display()
 	}
 
 	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 void initGL()

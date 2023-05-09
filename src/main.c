@@ -52,10 +52,7 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(keyboardDown);
     	glutKeyboardUpFunc(keyboardUp);
 
-	glutMainLoop();
+	glutIdleFunc(emulate_basic_block);
 
-	while(1)
-	{
-		emulate_basic_block();
-	}
+	glutMainLoop();
 }
