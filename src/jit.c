@@ -358,19 +358,72 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x1E)
                 { // ADD I, Vx 
 			// mov al, byte ptr [&context.V[ins.x]]
-			// add byte ptr [&context.I], al
+			// xor ah, ah
+			// add word ptr [&context.I], ax
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x29)
                 { // LD F, Vx
+			
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x33)
                 { // LD B, Vx
+		  // use F7 div
+		  	// mov rcx, &context.I
+			// add rcx, &context.memory
+
+			// mov al, byte ptr [&context.V[ins.x]]
+			// xor ah, ah
+			// mov bx, 1000
+			// div bx 
+			// mov ax, dx
+			// mov bx, 100
+			// div bx
+			// mov byte ptr [rcx], al
+
+                        // mov al, byte ptr [&context.V[ins.x]]
+                        // xor ah, ah
+                        // mov bx, 100
+                        // div bx 
+                        // mov ax, dx
+                        // mov bx, 10
+                        // div bx
+			// inc rcx
+                        // mov byte ptr [rcx], al
+
+	                // mov al, byte ptr [&context.V[ins.x]]
+                        // xor ah, ah
+                        // mov bx, 10
+                        // div bx 
+			// inc rcx
+                        // mov byte ptr [rcx], al
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x55)
                 { // LD [I], Vx
+		  	// mov rcx, &context.I
+			// add rcx, &context.memory
+		  	// xor rax, rax
+			// loop:
+			// cmp rax, ins.x
+			// jg next
+			// mov bl, byte ptr [rax + &context.V[0]]
+			// mov byte ptr [rcx + rax], bl
+			// inc rax
+			// jmp loop
+			// next:
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x65)
                 { // LD Vx, [I]
+                        // mov rcx, &context.I
+                        // add rcx, &context.memory
+                        // xor rax, rax
+                        // loop:
+                        // cmp rax, ins.x
+                        // jg next
+                        // mov bl, byte ptr [rax + rcx]
+                        // mov byte ptr [rax + &context.V[0]], bl
+                        // inc rax
+                        // jmp loop
+                        // next:
                 }                                  
 		else
 		{
