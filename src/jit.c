@@ -349,10 +349,16 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x18)
 		{ // LD ST, Vx
-			// no sound yet
+                        // mov al, byte ptr [&context.V[ins.x]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.x]);                                      
+                        // mov byte ptr [&context.st], al 
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.st);
 		}
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x1E)
                 { // ADD I, Vx 
+			// mov al, byte ptr [&context.V[ins.x]]
+			// add byte ptr [&context.I], al
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x29)
                 { // LD F, Vx
