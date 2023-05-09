@@ -23,10 +23,10 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 	struct instr_s ins;
 
 	int emitted_instr = 0;
-
+/*
         X64(0x55); //push rbp
         X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
-
+*/
 	for (source_i = 0; source_i < n; source_i++)
 	{
 		emitted_instr = 0;
@@ -142,61 +142,34 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 4)
                 { // ADD Vx, Vy
-			// mov bl, 0
-			X64(0xb3); X64(0x00);
-			// mov byte ptr [&context.V[15]], bl
-			X64(0x88); X64(0x1c); X64(0x25);
-			EMIT_32LE(&context.V[15]);
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// add byte ptr [&context.V[ins.x]], al
 			X64(0x00); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
-			// jnc 9 (size of next)
-			X64(0x73); X64(9);
-			// inc bl
-			X64(0xfe); X64(0xc3);
-			// add byte ptr [&context.V[15]], bl
-			X64(0x00); X64(0x1c); X64(0x25);
+			// setc byte ptr [&context.V[15]]
+			X64(0x0f); X64(0x92); X64(0x04);
 			EMIT_32LE(&context.V[15]);
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 5)
                 { // SUB Vx, Vy
-		  	// mov bl, 0
-			X64(0xb3); X64(0x00);
-			// mov byte ptr [&context.V[15]], bl 
-                        X64(0x88); X64(0x1c); X64(0x25);
-                        EMIT_32LE(&context.V[15]);
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
 			// sub byte ptr [&context.V[ins.x]], al
 			X64(0x28); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
-			// jnc 9 (size of next)
-			X64(0x72); X64(9);
-			// inc bl
-			X64(0xfe); X64(0xc3);
-			// add byte ptr [&context.V[15]], bl
-			X64(0x00); X64(0x1c); X64(0x25);
+			// setnc byte ptr [&context.V[15]]
+			X64(0x0f); X64(0x93); X64(0x04);
 			EMIT_32LE(&context.V[15]);
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 6)
                 { // SHR Vx {, Vy}
-			// mov bl, 0
-			X64(0xb3); X64(0x00);
-	                // mov byte ptr [&context.V[15]], bl 
-                        X64(0x88); X64(0x1c); X64(0x25);
-                        EMIT_32LE(&context.V[15]);
 			// mov al, byte ptr [&context.V[ins.x]]
 			MOV_AL_BYTE_PTR(&context.V[ins.x]);
 			// shr al, 1
 			X64(0xd0); X64(0xe8);
-			// jc 9 (size of next until Vx update)
-			X64(0x72); X64(9);
-			// inc bl
-			X64(0xfe); X64(0xc3);
-			// add byte ptr [&context.V[15]], bl
-                        X64(0x00); X64(0x1c); X64(0x25);
+                        // setc byte ptr [&context.V[15]]
+                        X64(0x0f); X64(0x92); X64(0x04);
                         EMIT_32LE(&context.V[15]);
 			// mov byte ptr [&context.V[ins.x]], al
                         X64(0x88); X64(0x04); X64(0x25);
@@ -204,43 +177,15 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 7)
                 { // SUBN Vx, Vy
-                        // mov bl, 0
-                        X64(0xb3); X64(0x00);
-                        // mov byte ptr [&context.V[15]], bl 
-                        X64(0x88); X64(0x1c); X64(0x25);
-                        EMIT_32LE(&context.V[15]);
-                        // mov al, byte ptr [&context.V[ins.y]]
-                        MOV_AL_BYTE_PTR(&context.V[ins.y]);
-			// mov cl, byte ptr [&context.V[ins.x]]
-			X64(0x8a); X64(0x0c); X64(0x25);
-			EMIT_32LE(&context.V[ins.x]);
-			// sub al, cl
-			X64(0x28); X64(0xc8);
-			// jnc 9
-			X64(0x72); X64(9);
-			// inc bl
-			X64(0xfe); X64(0xc3);
-			// mov byte ptr [&context.V[ins.x]], al
-                        X64(0x88); X64(0x04); X64(0x25);
-                        EMIT_32LE(&context.V[ins.x]);
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0xE)
                 { // SHL Vx {, Vy}
-                        // mov bl, 0
-                        X64(0xb3); X64(0x00);
-                        // mov byte ptr [&context.V[15]], bl 
-                        X64(0x88); X64(0x1c); X64(0x25);
-                        EMIT_32LE(&context.V[15]);
                         // mov al, byte ptr [&context.V[ins.x]]
                         MOV_AL_BYTE_PTR(&context.V[ins.x]);
                         // shl al, 1
                         X64(0xd0); X64(0xe0);
-                        // jc 9 (size of next until Vx update)
-                        X64(0x72); X64(9);
-                        // inc bl
-                        X64(0xfe); X64(0xc3);
-                        // add byte ptr [&context.V[15]], bl
-                        X64(0x00); X64(0x1c); X64(0x25);
+                        // setc byte ptr [&context.V[15]]
+                        X64(0x0f); X64(0x92); X64(0x04);
                         EMIT_32LE(&context.V[15]);
                         // mov byte ptr [&context.V[ins.x]], al 
                         X64(0x88); X64(0x04); X64(0x25);
@@ -292,6 +237,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xD000)
 		{ // DRW Vx, Vy, n
+			
 		}
 		else if ((instr[source_i] & 0xF000) == 0xE000 && instr[source_i] & 0xFF == 0x9E)
 		{ // SKP Vx
@@ -363,7 +309,11 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x29)
                 { // LD F, Vx
-			
+		  	// xor rax, rax
+			// mov al, byte ptr [&context.V[ins.x]]
+			// mov bl, 5
+			// mul bl
+			// mov word ptr [&context.I], ax
                 }                                  
                 else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x33)
                 { // LD B, Vx
@@ -439,7 +389,8 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 	}
 
-        X64(0xC9); X64(0xC3); // leave; ret
+        //X64(0xC9); // leave
+	X64(0xC3); // ret
 
 	return code;
 }
