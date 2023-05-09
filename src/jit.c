@@ -177,6 +177,19 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 7)
                 { // SUBN Vx, Vy
+			// mov al, byte ptr [&context.V[ins.y]]
+			MOV_AL_BYTE_PTR(&context.V[ins.y]);
+			// mov cl, byte ptr [&context.V[ins.x]]
+			X64(0x8a); X64(0x0c); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
+			// sub al, cl
+			X64(0x28); X64(0xc8);
+			// setnc byte ptr [&context.V[15]]
+                        X64(0x0f); X64(0x93); X64(0x04);
+                        EMIT_32LE(&context.V[15]);
+			// mov byte ptr [&context.V[ins.x]], al
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.V[ins.x]);
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0xE)
                 { // SHL Vx {, Vy}
