@@ -182,12 +182,50 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 6)
                 { // SHR Vx {, Vy}
-                }
+			// mov bl, 0
+			X64(0xb3); X64(0x00);
+	                // mov byte ptr [&context.V[15]], bl 
+                        X64(0x88); X64(0x1c); X64(0x25);
+                        EMIT_32LE(&context.V[15]);
+			// mov al, byte ptr [&context.V[ins.x]]
+			MOV_AL_BYTE_PTR(&context.V[ins.x]);
+			// shr al, 1
+			X64(0xd0); X64(0xe8);
+			// jc 9 (size of next until Vx update)
+			X64(0x72); X64(9);
+			// inc bl
+			X64(0xfe); X64(0xc3);
+			// add byte ptr [&context.V[15]], bl
+                        X64(0x00); X64(0x1c); X64(0x25);
+                        EMIT_32LE(&context.V[15]);
+			// mov byte ptr [&context.V[ins.x]], al
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.V[ins.x]);
+		}
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 7)
                 { // SUBN Vx, Vy
                 }
                 else if (instr[source_i] & 0xF000 == 0x8000 && instr[source_i] & 0xF == 0xE)
                 { // SHL Vx {, Vy}
+                        // mov bl, 0
+                        X64(0xb3); X64(0x00);
+                        // mov byte ptr [&context.V[15]], bl 
+                        X64(0x88); X64(0x1c); X64(0x25);
+                        EMIT_32LE(&context.V[15]);
+                        // mov al, byte ptr [&context.V[ins.x]]
+                        MOV_AL_BYTE_PTR(&context.V[ins.x]);
+                        // shl al, 1
+                        X64(0xd0); X64(0xe0);
+                        // jc 9 (size of next until Vx update)
+                        X64(0x72); X64(9);
+                        // inc bl
+                        X64(0xfe); X64(0xc3);
+                        // add byte ptr [&context.V[15]], bl
+                        X64(0x00); X64(0x1c); X64(0x25);
+                        EMIT_32LE(&context.V[15]);
+                        // mov byte ptr [&context.V[ins.x]], al 
+                        X64(0x88); X64(0x04); X64(0x25);
+                        EMIT_32LE(&context.V[ins.x]);
                 }
 
 		else if (instr[source_i] & 0xF000 == 0x9000) // SNE Vx, Vy
