@@ -33,7 +33,7 @@ void emulate_basic_block()
 		}
 		else
 		{
-                	while(!to_interpret(context.pc+n))
+                	while(!to_interpret(context.pc+n) && n < 0x800 - context.pc)
                 	{
                         	n++; // instructions to recompile
                 	}

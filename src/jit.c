@@ -327,6 +327,17 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x0A)
 		{ // LD Vx, K
+			// xor al, al
+			// mov bl, 1
+			// loop:
+			// cmp al, 16
+			// je begin
+			// cmp byte ptr [al + &context.keys], bl
+			// je +copy
+			// inc al
+			// jmp -loop
+			// copy:
+			// mov byte ptr [&context.V[ins.x]], al
 		}
 		else if ((instr[source_i] & 0xF000) == 0xF000 && instr[source_i] & 0xFF == 0x15)
 		{ // LD DT, Vx
@@ -357,7 +368,7 @@ uint8_t* jit_recompile(uint16_t* instr, int n)
                 }                                  
 		else
 		{
-			printf("unsupported opcode.\n");
+			printf("error: unsupported opcode.");
 			exit(0);
 		}
 
