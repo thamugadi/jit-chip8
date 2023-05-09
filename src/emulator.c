@@ -1,6 +1,8 @@
 #include <chip8.h>
 
-#define to_interpret(x) ((context.memory[x] == 0x00EE) || (context.memory[x] >> 12 == 1) || (context.memory[x] >> 12 == 2) || (context.memory[x] >> 12) == 0xB) // RET, JP, CALL
+#define to_interpret(x) ((x == 0x00EE) || (x >> 12 == 1) || (x >> 12 == 2) || (x >> 12 == 0xB) || (x >> 12 == 0xD))
+
+#define current(o) (uint16_t)((context.memory[context.pc+o] << 8) | context.memory[context.pc+1+o])
 
 struct context_s context;
 
@@ -14,9 +16,9 @@ void emulate_basic_block()
 
         int n=0;
 
-        if (to_interpret(context.pc))
+        if (to_interpret(current(0)))
         {
-                interpret(context.memory[context.pc]);
+                interpret(current(0));
                 context.pc++;
         }
 
@@ -33,7 +35,7 @@ void emulate_basic_block()
 		}
 		else
 		{
-                	while(!to_interpret(context.pc+n) && n < 0x800 - context.pc)
+                	while(!to_interpret(current(n*2)))
                 	{
                         	n++; // instructions to recompile
                 	}
@@ -44,7 +46,7 @@ void emulate_basic_block()
 		
 		recompiled_block++;
 		update_cache(recomp, n, context.pc);
-		context.pc += n;
+		context.pc += 2*n;
         }
 }
 

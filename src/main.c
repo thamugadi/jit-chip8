@@ -7,7 +7,7 @@
         glVertex2i(px+PIXELSIZE, py+PIXELSIZE); \
         glVertex2i(px, py+PIXELSIZE);
 
-uint8_t font[0x10][5] =
+uint8_t font[0x50] =
 { 
         0xF0, 0x90, 0x90, 0x90, 0xF0,
         0x20, 0x60, 0x20, 0x20, 0x70,
@@ -51,6 +51,7 @@ void display()
                         {
                                 DRAW_POS(i, j);
                         }
+
                 }
         }
         glEnd();
@@ -81,8 +82,8 @@ int main(int argc, char** argv)
         	fprintf(stderr, "Error: Failed to open file '%s'.\n", argv[1]);
         	return 2;
     	}
-	
-	size_t bytes_read = fread(context.memory+0x200, 2, 0x400, file);
+	uint8_t buffer[0x800];
+	size_t bytes_read = fread((uint8_t*)(context.memory+0x200), 1, 0x800, file);
 
 	if (bytes_read == 0x800 && !feof(file)) 
 	{
@@ -111,6 +112,8 @@ int main(int argc, char** argv)
         }
 
 	
+	uint8_t* ptr = context.memory;
+	for (int i = 0; i < 0x800; i++) printf("%x", ptr[i]);
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);

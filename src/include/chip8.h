@@ -25,7 +25,7 @@ void emulate_basic_block();
 
 void interpret(uint16_t instr);
 
-uint8_t* jit_recompile(uint16_t* instr, int n);
+uint8_t* jit_recompile(uint8_t* instr, int n);
 
 struct compiled_s
 {
@@ -36,7 +36,7 @@ struct compiled_s
 
 struct context_s
 {
-        uint16_t memory[0x500];
+        uint8_t memory[0x500];
         uint16_t stack[0x10];
 
         uint8_t sp; 
@@ -86,4 +86,4 @@ struct access_cache_s access_cache(uint16_t pc);
 
 void update_cache(uint8_t* addr, int n, uint16_t pc);
 
-extern uint8_t font[0x10][5];
+extern uint8_t font[0x50];
