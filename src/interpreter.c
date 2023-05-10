@@ -27,7 +27,7 @@ void interpret(uint16_t instr)
 
         else if ((instr & 0xF000) == 0x3000) // SE Vx, byte
         {
-                if (context.V[instr & 0x0F00] == (instr & 0xff))
+                if (context.V[(instr & 0x0F00) >> 8] == (instr & 0xff))
 		{
 			context.pc += 4;
 		}
@@ -38,7 +38,7 @@ void interpret(uint16_t instr)
         }
         else if ((instr & 0xF000) == 0x4000) // SNE Vx, byte
         {
-                if (context.V[instr & 0x0F00] != (instr & 0xff))
+                if (context.V[(instr & 0x0F00) >> 8] != (instr & 0xff))
                 {
                         context.pc += 4;
                 }

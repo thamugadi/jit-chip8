@@ -10,8 +10,6 @@ uint64_t recompiled_block = 0;
 
 void emulate_basic_block()
 {
-	struct access_cache_s cache_a;
-
 	uint8_t* recomp;
 
         int n=0;
