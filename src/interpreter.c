@@ -124,7 +124,7 @@ void interpret(uint16_t instr)
 					context.V[15] = 1;
 				}
 
-				context.gfx[(x+j)%WIDTH][32 - (y+i)%HEIGHT] ^= bit;
+				context.gfx[(x+j)%WIDTH][31 - (y+i)%HEIGHT] ^= bit;
 			}
 		}
 		context.pc += 2;

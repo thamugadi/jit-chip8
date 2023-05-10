@@ -250,8 +250,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         MOV_AL_BYTE_PTR(&context.V[ins.x]);
                         // shl al, 1
                         X64(0xd0); X64(0xe0);
-                        // setc byte ptr [&context.V[15]]
-                        X64(0x0f); X64(0x92); X64(0x04);
+                        // seto byte ptr [&context.V[15]]
+                        X64(0x0f); X64(0x90); X64(0x04);
 			X64(0x25);
                         EMIT_32LE(&context.V[15]);
                         // mov byte ptr [&context.V[ins.x]], al 
