@@ -59,7 +59,6 @@ void display()
         glEnd();
 
         glutSwapBuffers();
-	if (c == 2) asm("jmp $");
 }
 
 void initGL()

@@ -89,7 +89,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		}
 		else if ((current_instr & 0xF000) == 0x3000) // SE Vx, byte
 		{
-			// mov al, ins.kk
+/*			// mov al, ins.kk
 			X64(0xb0); X64(ins.kk);
 			// cmp al, byte ptr [&context.V[ins.x]]
 			CMP_AL_BYTE_PTR(&context.V[ins.x]);
@@ -98,10 +98,11 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0); 
 
 			fix_skip = 1;
+			*/
 		}
 		else if ((current_instr & 0xF000) == 0x4000) // SNE Vx, byte
                 {
-                        // mov al, ins.kk
+/*                        // mov al, ins.kk
                         X64(0xb0); X64(ins.kk);
                         // cmp al, byte ptr [&context.V[ins.x]]
                         CMP_AL_BYTE_PTR(&context.V[ins.x]);
@@ -110,10 +111,11 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0);
 
                         fix_skip = 1;
+			*/
                 }
 		else if ((current_instr & 0xF000) == 0x5000) // SE Vx, Vy
 		{
-			// mov al, byte ptr [&context.V[ins.x]]
+/*			// mov al, byte ptr [&context.V[ins.x]]
 			MOV_AL_BYTE_PTR(&context.V[ins.x])
 			// cmp al, byte ptr [&context.V[ins.y]]
 			CMP_AL_BYTE_PTR(&context.V[ins.y]);
@@ -122,6 +124,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0); 
 
 			fix_skip = 1;
+			*/
 		}
 		else if ((current_instr & 0xF000) == 0x6000) // LD Vx, byte
 		{
@@ -239,7 +242,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 		else if ((current_instr & 0xF000) == 0x9000) // SNE Vx, Vy
 		{
-                        // mov al, byte ptr [&context.V[ins.x]]
+/*                        // mov al, byte ptr [&context.V[ins.x]]
                         MOV_AL_BYTE_PTR(&context.V[ins.x])
                         // cmp al, byte ptr [&context.V[ins.y]]
                         CMP_AL_BYTE_PTR(&context.V[ins.y]);
@@ -248,6 +251,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0); 
 
                         fix_skip = 1;
+			*/
 		}
 
                 else if ((current_instr & 0xF000) == 0xA000) // LD I, addr

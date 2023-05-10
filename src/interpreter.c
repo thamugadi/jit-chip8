@@ -24,6 +24,52 @@ void interpret(uint16_t instr)
 		context.stack[context.sp] = context.pc;
 		context.pc = addr;
         }
+
+        else if ((instr & 0xF000) == 0x3000) // SE Vx, byte
+        {
+                if (context.V[instr & 0x0F00] == (instr & 0xff))
+		{
+			context.pc += 4;
+		}
+		else
+		{
+			context.pc += 2;
+		}
+        }
+        else if ((instr & 0xF000) == 0x4000) // SNE Vx, byte
+        {
+                if (context.V[instr & 0x0F00] != (instr & 0xff))
+                {
+                        context.pc += 4;
+                }
+                else
+                {       
+                        context.pc += 2;
+                }
+        }
+        else if ((instr & 0xF000) == 0x5000) // SE Vx, Vy
+        {
+                if (context.V[(instr & 0x0F00) >> 8] == (context.V[(instr & 0x00F0) >> 4]))
+                {
+                        context.pc += 4;
+                }
+                else
+                {       
+                        context.pc += 2;
+                }
+        }
+        else if ((instr & 0xF000) == 0x9000) // SNE Vx, Vy
+        {
+                if (context.V[(instr & 0x0F00) >> 8] != (context.V[(instr & 0x00F0) >> 4]))
+                {
+                        context.pc += 4;
+                }
+                else
+                {       
+                        context.pc += 2;
+                }
+        }
+
         
         else if ((instr & 0xF000) == 0xB000) // JP V0, addr
         {
@@ -32,7 +78,7 @@ void interpret(uint16_t instr)
 
 	else if ((instr & 0xF000) == 0xD000) // DRW Vx, Vy, nibble (temporary)
 	{
-		uint8_t xi, yi, x, y, n;
+		uint64_t xi, yi, x, y, n;
 		xi = (instr & 0x0F00) >> 8;
 		yi = (instr & 0x00F0) >> 4;
 
@@ -48,12 +94,12 @@ void interpret(uint16_t instr)
 			for (int j = 0; j < 8; j++)
 			{
 				uint8_t bit = (src << j) & 0b10000000;
-				if (bit && (context.gfx[(x+j)%WIDTH][(y+n-i)%HEIGHT]))
+				if (bit && (context.gfx[(x+j)%WIDTH][(y-i-1)%HEIGHT]))
 				{
 					context.V[15] = 1;
 				}
 
-				context.gfx[(x+j)%WIDTH][(y+n-i)%HEIGHT] ^= bit;
+				context.gfx[(x+j)%WIDTH][(y-i-1)%HEIGHT] ^= bit;
 			}
 		}
 		context.pc += 2;
