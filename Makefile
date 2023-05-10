@@ -6,3 +6,6 @@ clean:
 
 run:
 	./bin/jit-chip8 test
+
+gdb:
+	gdb --args ./bin/jit-chip8 test
