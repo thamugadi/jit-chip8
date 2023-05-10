@@ -59,7 +59,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	{
 		uint16_t current_instr = 
 			(uint16_t)(instr[source_i] << 8) | (uint16_t)(instr[source_i+1]);
-		printf("COMPILING: %x\n", current_instr);
+		printf("Compiled instruction: %x\n", current_instr);
 
 		emitted_instr = 0;
 		

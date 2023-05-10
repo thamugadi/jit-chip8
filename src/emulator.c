@@ -23,30 +23,15 @@ void emulate_basic_block()
 
         else
         {
-		cache_a = access_cache(context.pc);
-		if (cache_a.present)
-		{
-			n = cache_a.n;
-			recomp = cache_a.addr;
-
-			printf("Cached block at: %x\n", context.pc);
-
-			void (*f)() = recomp;
-			f();
-		}
-		else
-		{
-                	while(!to_interpret(current(n*2)))
-                	{
-                        	n++; // instructions to recompile
-                	}
-                	recomp = jit_recompile(&context.memory[context.pc], n);
-                        void (*f)() = recomp;
-                        f();
-		}
+                while(!to_interpret(current(n*2)))
+                {
+                	n++; // instructions to recompile
+                }
+                recomp = jit_recompile(&context.memory[context.pc], n);
+                void (*f)() = recomp;
+                f();
 		
 		recompiled_block++;
-		update_cache(recomp, n, context.pc);
 		context.pc += 2*n;
         }
 }
