@@ -19,7 +19,6 @@ void emulate_basic_block()
         if (to_interpret(current(0)))
         {
                 interpret(current(0));
-                context.pc++;
         }
 
         else
@@ -29,6 +28,8 @@ void emulate_basic_block()
 		{
 			n = cache_a.n;
 			recomp = cache_a.addr;
+
+			printf("Cached block at: %x\n", context.pc);
 
 			void (*f)() = recomp;
 			f();

@@ -27,14 +27,16 @@ uint8_t font[0x50] =
         0xF0, 0x80, 0xF0, 0x80, 0x80
 };
 
+int c = 0;
+
 void display()
 {
+	c++;
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_QUADS);
 
-	// emulation:
 	emulate_basic_block();
 
         if (context.dt)
@@ -57,6 +59,7 @@ void display()
         glEnd();
 
         glutSwapBuffers();
+	if (c == 2) asm("jmp $");
 }
 
 void initGL()
@@ -113,7 +116,7 @@ int main(int argc, char** argv)
 
 	
 	uint8_t* ptr = context.memory;
-	for (int i = 0; i < 0x800; i++) printf("%x", ptr[i]);
+//	for (int i = 0; i < 0x800; i++) printf("%x", ptr[i]);
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);

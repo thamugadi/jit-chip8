@@ -11,8 +11,34 @@
 #define MOV_AL_BYTE_PTR(a) X64(0x8a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 #define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 
+/*debug:
+48c7 c001 0000 0048 c7c7 0100 0000 e800
+0000 005e 48c7 c280 0000 000f 05eb fe
+
+mov rax, 1
+mov rdi, 1
+call next
+next:
+pop rsi
+mov rdx, 128
+syscall
+jmp $
+*/
+
+#define JIT_DEBUGGER \
+	X64(0x48); X64(0xc7); X64(0xc0); X64(0x01); X64(0x00); X64(0x00); X64(0x00); X64(0x48); \
+	X64(0xc7); \
+	X64(0xc7); \
+	X64(0x01); X64(0x00); X64(0x00); X64(0x00); X64(0xe8); X64(0x00); X64(0x00); X64(0x00); \
+	X64(0x00); X64(0x5e); X64(0x48); X64(0xc7); X64(0xc2); X64(0x80); X64(0x00); X64(0x00); \
+	X64(0x00); X64(0x0f); X64(0x05); X64(0xeb); X64(0xfe);
+
+#define STOP X64(0xeb); X64(0xfe);
+struct instr_s ins;
+
 uint8_t* jit_recompile(uint8_t* instr, int n)
 {
+
 	uint8_t* code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
 	int source_i;
@@ -20,18 +46,20 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 	int fix_skip = 0;
 
-	struct instr_s ins;
-
 	int emitted_instr = 0;
 
 /*
         X64(0x55); //push rbp
         X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
 */
-	for (source_i = 0; source_i < n; source_i++)
+
+//	JIT_DEBUGGER;
+
+	for (source_i = 0; source_i < n*2; source_i+=2)
 	{
 		uint16_t current_instr = 
 			(uint16_t)(instr[source_i] << 8) | (uint16_t)(instr[source_i+1]);
+		printf("COMPILING: %x\n", current_instr);
 
 		emitted_instr = 0;
 		
@@ -57,12 +85,12 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x48); X64(0x3d); X64(0x00); 
 			X64(0x08); X64(0x00); X64(0x00);
 			// jne -17 (previous 3 instr)
-			X64(0x75); X64(17);
+			X64(0x75); X64(0xed);
 		}
-		else if (current_instr & 0xF000 == 0x3000) // SE Vx, byte
+		else if ((current_instr & 0xF000) == 0x3000) // SE Vx, byte
 		{
-			// mov al, byte ptr [&ins.kk]
-			MOV_AL_BYTE_PTR(&ins.kk);
+			// mov al, ins.kk
+			X64(0xb0); X64(ins.kk);
 			// cmp al, byte ptr [&context.V[ins.x]]
 			CMP_AL_BYTE_PTR(&context.V[ins.x]);
 			// je 0 (placeholder)
@@ -71,10 +99,10 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 			fix_skip = 1;
 		}
-		else if (current_instr & 0xF000 == 0x4000) // SNE Vx, byte
+		else if ((current_instr & 0xF000) == 0x4000) // SNE Vx, byte
                 {
-                        // mov al, byte ptr [&ins.kk]
-                        MOV_AL_BYTE_PTR(&ins.kk);
+                        // mov al, ins.kk
+                        X64(0xb0); X64(ins.kk);
                         // cmp al, byte ptr [&context.V[ins.x]]
                         CMP_AL_BYTE_PTR(&context.V[ins.x]);
                         // jne 0 (placeholder)
@@ -83,7 +111,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
                         fix_skip = 1;
                 }
-		else if (current_instr & 0xF000 == 0x5000) // SE Vx, Vy
+		else if ((current_instr & 0xF000) == 0x5000) // SE Vx, Vy
 		{
 			// mov al, byte ptr [&context.V[ins.x]]
 			MOV_AL_BYTE_PTR(&context.V[ins.x])
@@ -95,24 +123,24 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 			fix_skip = 1;
 		}
-		else if (current_instr & 0xF000 == 0x6000) // LD Vx, byte
+		else if ((current_instr & 0xF000) == 0x6000) // LD Vx, byte
 		{
-			// mov al, byte ptr [&ins.kk]
-                        MOV_AL_BYTE_PTR(&ins.kk);
+			// mov al, ins.kk
+                        X64(0xb0); X64(ins.kk);
 			// mov byte ptr [&context.V[ins.x]], al
 			X64(0x88); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
 		}
-		else if (current_instr & 0xF000 == 0x7000) // ADD Vx, byte
+		else if ((current_instr & 0xF000) == 0x7000) // ADD Vx, byte
 		{
-			// mov al, byte ptr [&ins.kk]
-                        MOV_AL_BYTE_PTR(&ins.kk);
+			// mov al, ins.kk
+                        X64(0xb0); X64(ins.kk);
 			// add byte ptr [&context.V[ins.x]], al
                         X64(0x00); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
 
-		else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 0)
+		else if (((current_instr & 0xF000) == 0x8000) && (current_instr & 0xF) == 0)
 		{ // LD Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -120,7 +148,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
-		else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 1)
+		else if (((current_instr & 0xF000) == 0x8000) && (current_instr & 0xF) == 1)
 		{ // OR Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -128,7 +156,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x08); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
-		else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 2)
+		else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 2)
 		{ // AND Vx, Vy
                         // mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -136,7 +164,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x20); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
-		else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 3)
+		else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 3)
 		{ // XOR Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -144,7 +172,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x30); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
                 }
-                else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 4)
+                else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 4)
                 { // ADD Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -155,7 +183,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x0f); X64(0x92); X64(0x04);
 			EMIT_32LE(&context.V[15]);
                 }
-                else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 5)
+                else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 5)
                 { // SUB Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
                         MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -166,7 +194,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x0f); X64(0x93); X64(0x04);
 			EMIT_32LE(&context.V[15]);
                 }
-                else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 6)
+                else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 6)
                 { // SHR Vx {, Vy}
 			// mov al, byte ptr [&context.V[ins.x]]
 			MOV_AL_BYTE_PTR(&context.V[ins.x]);
@@ -179,7 +207,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
-                else if (current_instr & 0xF000 == 0x8000 && current_instr & 0xF == 7)
+                else if ((current_instr & 0xF000) == 0x8000 && (current_instr & 0xF) == 7)
                 { // SUBN Vx, Vy
 			// mov al, byte ptr [&context.V[ins.y]]
 			MOV_AL_BYTE_PTR(&context.V[ins.y]);
@@ -195,7 +223,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
                 }
-                else if (current_instr& 0xF000 == 0x8000 && current_instr & 0xF == 0xE)
+                else if ((current_instr& 0xF000) == 0x8000 && (current_instr & 0xF) == 0xE)
                 { // SHL Vx {, Vy}
                         // mov al, byte ptr [&context.V[ins.x]]
                         MOV_AL_BYTE_PTR(&context.V[ins.x]);
@@ -209,7 +237,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         EMIT_32LE(&context.V[ins.x]);
                 }
 
-		else if (current_instr & 0xF000 == 0x9000) // SNE Vx, Vy
+		else if ((current_instr & 0xF000) == 0x9000) // SNE Vx, Vy
 		{
                         // mov al, byte ptr [&context.V[ins.x]]
                         MOV_AL_BYTE_PTR(&context.V[ins.x])
@@ -222,20 +250,22 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         fix_skip = 1;
 		}
 
-                else if (current_instr & 0xF000 == 0xA000) // LD I, addr
+                else if ((current_instr & 0xF000) == 0xA000) // LD I, addr
 		{
+			uint8_t* ptr = &context.I;
+
 			// mov ax, ins.nnn
 			X64(0x66); X64(0xB8);
 			X64(ins.nnn & 0xff);
 			X64(ins.nnn >> 8);
 			// mov byte ptr [&context.I], ah
 			X64(0x88); X64(0x24); X64(0x25);
-			EMIT_32LE(&context.I);
+			EMIT_32LE(ptr+1);
 			// mov byte ptr [&context.I+1], al
 			X64(0x88); X64(0x04); X64(0x25);
-			EMIT_32LE(&context.I+1);
+			EMIT_32LE(ptr);
 		}
-                else if (current_instr & 0xF000 == 0xC000) // RND Vx, byte
+                else if ((current_instr & 0xF000) == 0xC000) // RND Vx, byte
 		{
 			// mov rax, 0x13e
 			X64(0x48); X64(0xc7); X64(0xc0);
@@ -250,8 +280,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x00);
 			// syscall
 			X64(0x0f); X64(0x05);
-			// mov al, byte ptr [&ins.kk]
-                        MOV_AL_BYTE_PTR(&ins.kk);
+			// mov al, ins.kk
+                        X64(0xb0); X64(ins.kk);
 			// and byte ptr [&context.V[ins.x]], al
                         X64(0x20); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
@@ -260,7 +290,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		{ // DRW Vx, Vy, n
 			// Currently interpreted, waiting to be implemented here.
 		}
-		else if ((current_instr & 0xF000) == 0xE000 && current_instr & 0xFF == 0x9E)
+		else if ((current_instr & 0xF000) == 0xE000 && (current_instr & 0xFF) == 0x9E)
 		{ // SKP Vx
 			// mov al, byte ptr [&context.keys[ins.x]]
 			MOV_AL_BYTE_PTR(&context.keys[ins.x]);
@@ -272,7 +302,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
                         fix_skip = 1;
 		}
-		else if ((current_instr & 0xF000) == 0xE000 && current_instr & 0xFF == 0xA1)
+		else if ((current_instr & 0xF000) == 0xE000 && (current_instr & 0xFF) == 0xA1)
 		{ // SKNP Vx
                         // mov al, byte ptr [&context.keys[ins.x]]
                         MOV_AL_BYTE_PTR(&context.keys[ins.x]);
@@ -284,7 +314,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 	
                         fix_skip = 1;
 		}
-		else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x07)
+		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x07)
 		{ // LD Vx, DT
 			// mov al, byte ptr [&context.dt]
 			MOV_AL_BYTE_PTR(&context.dt);
@@ -292,7 +322,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
 		}
-		else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x0A)
+		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x0A)
 		{ // LD Vx, K
 		  	// begin:
 			// xor rax, rax
@@ -318,7 +348,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x88); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
 		}
-		else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x15)
+		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x15)
 		{ // LD DT, Vx
                         // mov al, byte ptr [&context.V[ins.x]]
                         MOV_AL_BYTE_PTR(&context.V[ins.x]);                                      
@@ -334,7 +364,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.st);
 		}
-                else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x1E)
+                else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x1E)
                 { // ADD I, Vx 
 		  	// xor ax, ax
 			X64(0x66); X64(0x31); X64(0xc0);
@@ -359,7 +389,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         EMIT_32LE(&context.I+1);
 
                 }                                  
-                else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x29)
+                else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x29)
                 { // LD F, Vx
 		  	// xor rax, rax
 			X64(0x48); X64(0x31); X64(0xc0);
@@ -378,7 +408,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         EMIT_32LE(&context.I+1);
 
                 }                                  
-                else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x33)
+                else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x33)
                 { // LD B, Vx
 		  // use F7 div
 		  	// mov rcx, &context.I
@@ -438,7 +468,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         // mov byte ptr [rcx], al
 			X64(0x88); X64(0x01);
                 }                                  
-                else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x55)
+                else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x55)
                 { // LD [I], Vx
 		  	// mov rcx, &context.I
 			X64(0x48); X64(0xc7); X64(0xc1);
@@ -465,7 +495,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0xeb); X64(0xea);
 			// next:
                 }                                  
-                else if ((current_instr & 0xF000) == 0xF000 && current_instr & 0xFF == 0x65)
+                else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x65)
                 { // LD Vx, [I]
                         // mov rcx, &context.I
                         X64(0x48); X64(0xc7); X64(0xc1);
