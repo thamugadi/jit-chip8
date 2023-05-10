@@ -432,79 +432,64 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x33)
                 { // LD B, Vx
-		  // use F7 div
-//		  	STOP;
+		  // use F6 div
 			uint8_t* ptr = &context.I;
 			// xor rax, rax
 			X64(0x48); X64(0x31); X64(0xc0);
-                        // xor rcx, rcx
+			// xor rcx, rcx
 			X64(0x48); X64(0x31); X64(0xc9);
-                        // mov cl, byte ptr [&context.I]
+			// mov dl, byte ptr [&context.V[ins.x]]
+			X64(0x8a); X64(0x14); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
+			// mov cl, byte ptr [&context.I]
 			X64(0x8a); X64(0x0c); X64(0x25);
 			EMIT_32LE(ptr);
-                        // mov ch, byte ptr [&context.I+1]
+			// mov ch, byte ptr [&context.I+1]
 			X64(0x8a); X64(0x2c); X64(0x25);
 			EMIT_32LE(ptr+1);
 			// add rcx, &context.memory
 			X64(0x48); X64(0x81); X64(0xc1);
 			EMIT_32LE(&context.memory);
-			// mov al, byte ptr [&context.V[ins.x]]
-			X64(0x8a); X64(0x04); X64(0x25);
-			EMIT_32LE(&context.V[ins.x]);
-			// mov bx, 1000
-			X64(0x66); X64(0xbb); X64(0xe8);
-			X64(0x03);
-			// div bx 
-			//X64(0x66);
-			X64(0xf7); X64(0xf3);
-			// mov ax, dx
-			X64(0x66); X64(0x89); X64(0xd0);
-			// mov bx, 100
-			X64(0x66); X64(0xbb);
-			X64(0x64); X64(0x00);
-			// div bx
-			//X64(0x66);
-			X64(0xf7); X64(0xf3);
-			// mov byte ptr [rcx], al
-			X64(0x88); X64(0x01);
-
-                        // mov al, byte ptr [&context.V[ins.x]]
-			X64(0x8a); X64(0x04); X64(0x25);
-			EMIT_32LE(&context.V[ins.x]);
-                        // xor ah, ah
+			// mov al, dl
+			X64(0x88); X64(0xd0);
+			// mov bl, 100
+			X64(0xb3); X64(0x64);
+			// div bl
+			X64(0xf6); X64(0xf3);
+			// xor ah, ah
 			X64(0x30); X64(0xe4);
-                        // mov bx, 100
-                        X64(0x66); X64(0xbb);
-                        X64(0x64); X64(0x00);
-                        // div bx 
-			//X64(0x66);
-			X64(0xf7); X64(0xf3);
-                        // mov ax, dx
-			X64(0x66); X64(0x89); X64(0xd0);
-                        // mov bx, 10
-			X64(0x66); X64(0xbb); X64(0x0a); X64(0x00);
-                        // div bx
-			//X64(0x66);
-			X64(0xf7); X64(0xf3);
+			// mov bl, 10
+			X64(0xb3); X64(0x0a);
+			// div bl
+			X64(0xf6); X64(0xf3);
+			// mov byte ptr [rcx], ah
+			X64(0x88); X64(0x21);
 			// inc rcx
 			X64(0x48); X64(0xff); X64(0xc1);
-                        // mov byte ptr [rcx], al
-			X64(0x88); X64(0x01);
-
-	                // mov al, byte ptr [&context.V[ins.x]]
-			X64(0x8a); X64(0x04); X64(0x25);
-			EMIT_32LE(&context.V[ins.x]);
-                        // xor ah, ah
+			// xor ax, ax
+			X64(0x66); X64(0x31); X64(0xc0);
+			// mov al, dl
+			X64(0x88); X64(0xd0);
+			// div bl
+			X64(0xf6); X64(0xf3);
+			// xor ah, ah
 			X64(0x30); X64(0xe4);
-                        // mov bx, 10
-			X64(0x66); X64(0xbb); X64(0x0a); X64(0x00);
-                        // div bx 
-			//X64(0x66);
-			X64(0xf7); X64(0xf3);
+			// div bl
+			X64(0xf6); X64(0xf3);
+			// mov byte ptr [rcx], ah
+			X64(0x88); X64(0x21);
 			// inc rcx
-			X64(0x48); X64(0xff); X64(0xc1);
-                        // mov byte ptr [rcx], al
-			X64(0x88); X64(0x01);
+			X64(0x48); X64(0xff); X64(0xc1
+);
+			// xor ax, ax
+			X64(0x66); X64(0x31); X64(0xc0
+);
+			// mov al, dl
+			X64(0x88); X64(0xd0);
+			// div bl
+			X64(0xf6); X64(0xf3);
+			// mov byte ptr [rcx], ah
+			X64(0x88); X64(0x21);
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x55)
                 { // LD [I], Vx
@@ -541,9 +526,16 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x65)
                 { // LD Vx, [I]
-                        // mov rcx, context.I
-                        X64(0x48); X64(0xc7); X64(0xc1);
-                        EMIT_32LE(context.I);
+		  	uint8_t* ptr = &context.I;
+                        // xor rcx, rcx
+                        X64(0x48); X64(0x31); X64(0xc9);
+                        // mov cl, byte ptr [&context.I]
+                        X64(0x8a); X64(0x0c); X64(0x25);
+                        EMIT_32LE(ptr);
+                        // mov ch, byte ptr [&context.I+1]
+                        X64(0x8a); X64(0x2c); X64(0x25);
+                        EMIT_32LE(ptr+1);
+
                         // add rcx, &context.memory
                         X64(0x48); X64(0x81); X64(0xc1);
                         EMIT_32LE(&context.memory);
