@@ -94,12 +94,12 @@ void interpret(uint16_t instr)
 			for (int j = 0; j < 8; j++)
 			{
 				uint8_t bit = (src << j) & 0b10000000;
-				if (bit && (context.gfx[(x+j)%WIDTH][(y-i-1)%HEIGHT]))
+				if (bit && (context.gfx[(x+j)%WIDTH][32 - (y+i)%HEIGHT]))
 				{
 					context.V[15] = 1;
 				}
 
-				context.gfx[(x+j)%WIDTH][(y-i-1)%HEIGHT] ^= bit;
+				context.gfx[(x+j)%WIDTH][32 - (y+i)%HEIGHT] ^= bit;
 			}
 		}
 		context.pc += 2;
