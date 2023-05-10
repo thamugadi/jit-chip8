@@ -31,7 +31,20 @@ int c = 0;
 
 void display()
 {
-	c++;
+	if (wait_keyboard)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			if (context.keys[i])
+			{
+				wait_keyboard = 0;
+				context.V[wait_register] = i;
+				goto next1;
+			}
+		}
+		goto end;
+	}
+next1:
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(1.0, 1.0, 1.0);
@@ -57,6 +70,7 @@ void display()
         }
         glEnd();
 
+end:
         glutSwapBuffers();
 }
 
@@ -84,11 +98,11 @@ int main(int argc, char** argv)
         	return 2;
     	}
 	uint8_t buffer[0x800];
-	size_t bytes_read = fread((uint8_t*)(context.memory+0x200), 1, 0x800, file);
+	size_t bytes_read = fread((uint8_t*)(context.memory+0x200), 1, MEMSIZE*2 - 0x200, file);
 
 	if (bytes_read == 0x800 && !feof(file)) 
 	{
-        	fprintf(stderr, "Error: File size is larger than 0x800. \n");
+        	fprintf(stderr, "Error: File size is larger than %x. \n", MEMSIZE*2 - 0x200);
         	fclose(file);
 		return 3;
 	}

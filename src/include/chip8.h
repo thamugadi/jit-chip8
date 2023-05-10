@@ -12,8 +12,13 @@
 #define HEIGHT 32
 #define PIXELSIZE 1
 
+#define MEMSIZE 0x1000
+
 extern void initGL();
 extern void display();
+
+extern int wait_keyboard;
+extern int wait_register;
 
 extern void keyboardUp(uint8_t key, int x, int y);
 extern void keyboardDown(uint8_t key, int x, int y);
@@ -37,7 +42,7 @@ struct compiled_s
 
 struct context_s
 {
-        uint8_t memory[0x500];
+        uint8_t memory[MEMSIZE];
         uint16_t stack[0x10];
 
         uint8_t sp; 

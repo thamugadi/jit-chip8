@@ -1,5 +1,8 @@
 #include <chip8.h>
 
+int wait_keyboard = 0;
+int wait_register;
+
 void interpret(uint16_t instr)
 {
 	uint16_t addr = instr & 0x0FFF;
@@ -68,6 +71,30 @@ void interpret(uint16_t instr)
                 }
         }
 
+	else if ((instr & 0xF000) == 0xE000 && (instr & 0xFF) == 0x9E) //SKP Vx
+	{
+		if (context.keys[context.V[(instr & 0x0F00) >> 8]])
+		{
+			context.pc += 4;
+		}
+		else
+		{
+			context.pc += 2;
+		}
+	}
+        else if ((instr & 0xF000) == 0xE000 && (instr & 0xFF) == 0xA1) //SKNP Vx
+        {
+                if (!(context.keys[context.V[(instr & 0x0F00) >> 8]]))
+                {
+                        context.pc += 4;
+                }
+                else
+                {       
+                        context.pc += 2;
+                }
+        }
+
+
         
         else if ((instr & 0xF000) == 0xB000) // JP V0, addr
         {
@@ -102,6 +129,13 @@ void interpret(uint16_t instr)
 		}
 		context.pc += 2;
 
+	}
+
+	else if ((instr & 0xF000) == 0xF000 && (instr & 0xFF) == 0x0A) // LD Vx, K
+	{
+		wait_keyboard = 1;
+		wait_register = (instr & 0x0F00) >> 8;
+		context.pc += 2;
 	}
 }
 

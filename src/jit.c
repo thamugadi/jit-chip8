@@ -97,15 +97,20 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		}
 		else if ((current_instr & 0xF000) == 0x3000) // SE Vx, byte
 		{
-/*			// mov al, ins.kk
-			X64(0xb0); X64(ins.kk);
-			// cmp al, byte ptr [&context.V[ins.x]]
-			CMP_AL_BYTE_PTR(&context.V[ins.x]);
-			// je 0 (placeholder)
-			X64(0x74);
-			X64(0); 
+/*			if ((source_i + 2) != n*2)
+			{
 
-			fix_skip = 1;
+				// mov al, ins.kk
+				X64(0xb0); X64(ins.kk);
+				// cmp al, byte ptr [&context.V[ins.x]]
+				CMP_AL_BYTE_PTR(&context.V[ins.x]);
+				// je 0 (placeholder)
+			
+				X64(0x74);
+				X64(0); 
+
+				fix_skip = 1;
+			}
 			*/
 		}
 		else if ((current_instr & 0xF000) == 0x4000) // SNE Vx, byte
