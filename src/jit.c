@@ -440,15 +440,17 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x33)
                 { // LD B, Vx
 		  // use F7 div
-		  	// mov rcx, &context.I
-			X64(0x48); X64(0xc7); X64(0xc1);
-			EMIT_32LE(&context.I);
+		  	STOP;
+			// xor rax, rax
+			X64(0x48); X64(0x31); X64(0xc0);
+                        // xor rcx, rcx
+                        // mov cl, byte ptr [&context.I]
+                        // mov ch, byte ptr [&context.I+1]
 			// add rcx, &context.memory
 			X64(0x48); X64(0x81); X64(0xc1);
 			// mov al, byte ptr [&context.V[ins.x]]
 			X64(0x8a); X64(0x04); X64(0x25);
-			// xor ah, ah
-			X64(0x30); X64(0xe4);
+			EMIT_32LE(&context.V[ins.x]);
 			// mov bx, 1000
 			X64(0x66); X64(0xbb); X64(0xe8);
 			X64(0x03);
@@ -466,6 +468,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
                         // mov al, byte ptr [&context.V[ins.x]]
 			X64(0x8a); X64(0x04); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
                         // xor ah, ah
 			X64(0x30); X64(0xe4);
                         // mov bx, 100
@@ -486,6 +489,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 	                // mov al, byte ptr [&context.V[ins.x]]
 			X64(0x8a); X64(0x04); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
                         // xor ah, ah
 			X64(0x30); X64(0xe4);
                         // mov bx, 10
@@ -499,9 +503,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x55)
                 { // LD [I], Vx
-		  	// mov rcx, context.I
-			X64(0x48); X64(0xc7); X64(0xc1);
-			EMIT_32LE(context.I);
+		  	// xor rcx, rcx
+			// mov cl, byte ptr [&context.I]
+			// mov ch, byte ptr [&context.I+1]
 			// add rcx, &context.memory
                         X64(0x48); X64(0x81); X64(0xc1);
                         EMIT_32LE(&context.memory);

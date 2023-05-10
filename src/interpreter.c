@@ -6,8 +6,7 @@ void interpret(uint16_t instr)
 	printf("Interpreted: %x\n", instr);
 	if (instr == 0x00EE) // RET
 	{
-		context.pc = context.stack[context.sp];
-		context.sp--;
+		context.pc = context.stack[--context.sp];
 	}
 	else if ((instr & 0xF000) == 0x1000) // JP addr
 	{
@@ -20,8 +19,7 @@ void interpret(uint16_t instr)
 	}
         else if ((instr & 0xF000) == 0x2000) // CALL addr
         {
-		context.sp++;
-		context.stack[context.sp] = context.pc;
+		context.stack[context.sp++] = context.pc + 2;
 		context.pc = addr;
         }
 
