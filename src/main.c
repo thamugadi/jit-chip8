@@ -37,7 +37,7 @@ void display()
         glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_QUADS);
 
-
+	emulate_basic_block();
         if (context.dt)
         {                                       
                 context.dt--;
@@ -58,7 +58,6 @@ void display()
         glEnd();
 
         glutSwapBuffers();
-	emulate_basic_block();
 }
 
 void initGL()

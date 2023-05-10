@@ -50,7 +50,16 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
         X64(0x55); //push rbp
         X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
-	__SUB_RSP(0x100);
+	__SUB_RSP(0x40);
+
+	// push rax
+	X64(0x50);
+	// push rbx
+	X64(0x53);
+	// push rcx
+	X64(0x51);
+	// push rdx
+	X64(0x52);
 
 //	JIT_DEBUGGER;
 
@@ -555,6 +564,15 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			fix_skip = 0;
 		}
 	}
+
+	//pop rdx
+	X64(0x5a);
+	//pop rcx
+	X64(0x59);
+	//pop rbx
+	X64(0x5b);
+	//pop rax
+	X64(0x58);
 
         X64(0xC9); // leave
 	X64(0xC3); // ret
