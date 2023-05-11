@@ -231,15 +231,16 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// mov cl, byte ptr [&context.V[ins.x]]
 			X64(0x8a); X64(0x0c); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
-			// sub al, cl
-			X64(0x28); X64(0xc8);
-			// setnc byte ptr [&context.V[15]]
-                        X64(0x0f); X64(0x93); X64(0x04);
-			X64(0x25);
-                        EMIT_32LE(&context.V[15]);
 			// mov byte ptr [&context.V[ins.x]], al
-                        X64(0x88); X64(0x04); X64(0x25);
-                        EMIT_32LE(&context.V[ins.x]);
+			X64(0x88); X64(0x04); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
+			// sub byte ptr [&context.V[ins.x]], cl
+			X64(0x28); X64(0x0c); X64(0x25);
+			EMIT_32LE(&context.V[ins.x]);
+                        // setnc byte ptr [&context.V[15]]
+                        X64(0x0f); X64(0x93); X64(0x04);
+                        X64(0x25);
+                        EMIT_32LE(&context.V[15]);
                 }
                 else if ((current_instr& 0xF000) == 0x8000 && (current_instr & 0xF) == 0xE)
                 { // SHL Vx {, Vy}
