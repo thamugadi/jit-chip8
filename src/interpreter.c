@@ -133,8 +133,18 @@ void interpret(uint16_t instr)
 
 	else if ((instr & 0xF000) == 0xF000 && (instr & 0xFF) == 0x0A) // LD Vx, K
 	{
-		wait_keyboard = 1;
-		wait_register = (instr & 0x0F00) >> 8;
+		while(1)
+		{
+			for (int i = 0; i < 16; i++)
+			{
+				if (context.keys[i])
+				{
+					context.V[(instr & 0x0F00)>>8] = i;
+					goto press;
+				}
+			}
+		}
+press:
 		context.pc += 2;
 	}
 }

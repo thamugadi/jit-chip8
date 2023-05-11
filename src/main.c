@@ -27,24 +27,8 @@ uint8_t font[0x50] =
         0xF0, 0x80, 0xF0, 0x80, 0x80
 };
 
-int c = 0;
-
 void display()
 {
-	if (wait_keyboard)
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			if (context.keys[i])
-			{
-				wait_keyboard = 0;
-				context.V[wait_register] = i;
-				goto next1;
-			}
-		}
-		goto end;
-	}
-next1:
         glClear(GL_COLOR_BUFFER_BIT);
 
         glColor3f(1.0, 1.0, 1.0);
@@ -69,8 +53,6 @@ next1:
                 }
         }
         glEnd();
-
-end:
         glutSwapBuffers();
 }
 
