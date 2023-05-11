@@ -4,6 +4,6 @@ Work-in-progress JIT compiler for the CHIP-8. Currently, it works erratically an
 
 TODO:
 
- - compile DXYN, Fx0A
+ - compile Dxyn, Fx0A
  - optimize generated code
  - handle self-modifying code
