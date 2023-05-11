@@ -27,6 +27,7 @@ void emulate_basic_block()
                 recomp = jit_recompile(&context.memory[context.pc], n);
                 void (*f)() = recomp;
                 f();
+		munmap(&recomp, n*MAX_EMITTED); 
 		
 		recompiled_block++;
 		context.pc += 2*n;
