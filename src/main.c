@@ -110,7 +110,6 @@ int main(int argc, char** argv)
 
 	
 	uint8_t* ptr = context.memory;
-//	for (int i = 0; i < 0x800; i++) printf("%x", ptr[i]);
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -128,10 +127,4 @@ int main(int argc, char** argv)
 	glutIdleFunc(display);
 
 	glutMainLoop();
-
-/*	while(1)
-	{
-		emulate_basic_block();
-	}
-	*/
 }

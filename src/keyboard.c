@@ -1,6 +1,6 @@
 #include <chip8.h> 
 
-#define KEY(a) (key == a || key == a+32)
+#define KEY(a) (key == a)
 
 void keyboardUp(uint8_t key, int x, int y)
 {

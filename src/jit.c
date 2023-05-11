@@ -560,6 +560,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		else
 		{
 			printf("error: unsupported opcode: %x\n", current_instr);
+			printf("%x\n", context.pc);
 			exit(1);
 		}
 

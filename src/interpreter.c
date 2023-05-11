@@ -1,8 +1,5 @@
 #include <chip8.h>
 
-int wait_keyboard = 0;
-int wait_register;
-
 void interpret(uint16_t instr)
 {
 	uint16_t addr = instr & 0x0FFF;
