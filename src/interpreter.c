@@ -3,7 +3,7 @@
 void interpret(uint16_t instr)
 {
 	uint16_t addr = instr & 0x0FFF;
-	printf("Interpreted: %x\n", instr);
+	printf("Interpreting: %x at %x\n", instr, context.pc);
 	if (instr == 0x00EE) // RET
 	{
 		context.pc = context.stack[--context.sp];

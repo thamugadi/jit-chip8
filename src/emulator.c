@@ -37,6 +37,7 @@ void emulate_basic_block()
                 	{
                         	n++; // instructions to recompile
                 	}
+			printf("Compiling block at: %x\n", context.pc);
                 	recomp = jit_recompile(&context.memory[context.pc], n);
                         void (*f)() = recomp;
                         f();

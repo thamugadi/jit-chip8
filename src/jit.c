@@ -67,7 +67,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	{
 		uint16_t current_instr = 
 			(uint16_t)(instr[source_i] << 8) | (uint16_t)(instr[source_i+1]);
-		printf("Compiled instruction: %x\n", current_instr);
+		printf("Compiling instruction: %x at %x\n", current_instr, context.pc + source_i);
 
 		emitted_instr = 0;
 		
@@ -560,7 +560,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		else
 		{
 			printf("error: unsupported opcode: %x\n", current_instr);
-			printf("%x\n", context.pc);
+			printf("at %x\n", context.pc+source_i);
 			exit(1);
 		}
 
