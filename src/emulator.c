@@ -10,6 +10,7 @@ uint64_t recompiled_block = 0;
 void emulate_basic_block()
 {
 	uint8_t* recomp;
+	struct access_cache_s cache_a;
 
         int n=0;
 
@@ -17,18 +18,31 @@ void emulate_basic_block()
         {
                 interpret(current(0));
         }
+     	else
+	{
+		cache_a = access_cache(context.pc);
+		if (cache_a.present)
+		{
+			n = cache_a.n;
+			recomp = cache_a.addr;
 
-        else
-        {
-                while(!to_interpret(current(n*2)))
-                {
-                	n++; // instructions to recompile
-                }
-                recomp = jit_recompile(&context.memory[context.pc], n);
-                void (*f)() = recomp;
-                f();
-		munmap(&recomp, n*MAX_EMITTED); 
-		
+			printf("Cached block at: %x\n", context.pc);
+
+			void (*f)() = recomp;
+			f();
+		}
+		else
+		{
+                	while(!to_interpret(current(n*2)))
+                	{
+                        	n++; // instructions to recompile
+                	}
+                	recomp = jit_recompile(&context.memory[context.pc], n);
+                        void (*f)() = recomp;
+                        f();
+			update_cache(recomp, n, context.pc);
+		}
+
 		recompiled_block++;
 		context.pc += 2*n;
         }
