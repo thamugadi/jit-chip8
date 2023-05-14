@@ -6,7 +6,7 @@
 
 #define MAX_EMITTED 4096 
 
-#define CACHE_SIZE 8 
+#define CACHE_SIZE 12 
 
 #define WIDTH 64
 #define HEIGHT 32
