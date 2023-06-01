@@ -61,8 +61,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	// push rdx
 	X64(0x52);
 
-//	JIT_DEBUGGER;
-
 	for (source_i = 0; source_i < n*2; source_i+=2)
 	{
 		uint16_t current_instr = 
@@ -306,7 +304,66 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		}
 		else if ((current_instr & 0xF000) == 0xD000)
 		{ // DRW Vx, Vy, n
-			// Currently interpreted, waiting to be implemented here.
+		  // TODO: %WIDTH, %HEIGHT
+			// mov rax, &context.memory
+			X64(0x48); X64(0xc7); X64(0xc0);
+			EMIT_32LE(&context.memory);
+			// add ax, word ptr [&context.I]
+			X64(0x66); X64(0x03); X64(0x04);
+			X64(0x25);
+			EMIT_32LE(&context.I);
+			// mov bh, 32
+			X64(0xb7); X64(0x1f);
+			// sub bh, byte ptr [&context.V[ins.y]]
+			X64(0x2a); X64(0x3c); X64(0x25);
+			EMIT_32LE(&context.V[ins.y]);
+			// mov dh, byte ptr [&context.V[ins.x]]
+                        X64(0x8a); X64(0x34); X64(0x25);
+                        EMIT_32LE(&context.V[ins.x]);
+			// mov r9, ins.n
+			X64(0x49); X64(0xc7); X64(0xc1);
+			EMIT_32LE(ins.n);
+			// loop:
+			// mov bl, byte ptr [rax]
+			X64(0x8a); X64(0x18);
+			// inc rax
+			X64(0x48); X64(0xff); X64(0xc0);
+			// mov r10, rdx
+			X64(0x49); X64(0x89); X64(0xd2);
+			// and r10, 0xff00
+			X64(0x49); X64(0x81); X64(0xe2);
+			EMIT_32LE(0xff00);
+			// shr r10, 3
+			X64(0x49); X64(0xc1); X64(0xea);
+			X64(0x03);
+			// mov r11, rbx
+			X64(0x49); X64(0x89); X64(0xdb);
+			// and r11, 0xff00
+			X64(0x49); X64(0x81); X64(0xe3);
+			EMIT_32LE(0xff00);
+			// shr r11, 8
+			X64(0x49); X64(0xc1); X64(0xeb);
+			X64(0x08);
+			// lea rcx, [&context.gfx + r10 + r11]
+			X64(0x4b); X64(0x8d); X64(0x8c);
+			X64(0x1a);
+			EMIT_32LE(&context.gfx);
+			// mov dl, byte ptr [rcx]
+			X64(0x8a); X64(0x11);
+			// xor byte ptr [rcx], bl
+			X64(0x30); X64(0x19);
+			// and bl, dl
+			X64(0x20); X64(0xd3);
+			// setnz byte ptr [&context.V[15]]
+			X64(0x0f); X64(0x95); X64(0x04);
+			X64(0x25);
+			EMIT_32LE(&context.V[15]);
+			// inc bh
+			X64(0xfe); X64(0xc7);
+			// dec r9
+			X64(0x49); X64(0xff); X64(0xc9);
+			// jnz loop
+			X64(0x75); X64(0xc2);
 		}
 		else if ((current_instr & 0xF000) == 0xE000 && (current_instr & 0xFF) == 0x9E)
 		{ // SKP Vx
@@ -478,11 +535,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
 			// inc rcx
-			X64(0x48); X64(0xff); X64(0xc1
-);
+			X64(0x48); X64(0xff); X64(0xc1);
 			// xor ax, ax
-			X64(0x66); X64(0x31); X64(0xc0
-);
+			X64(0x66); X64(0x31); X64(0xc0);
 			// mov al, dl
 			X64(0x88); X64(0xd0);
 			// div bl
