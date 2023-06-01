@@ -98,35 +98,5 @@ void interpret(uint16_t instr)
 		context.pc = addr + context.V[0];
         }
 
-	else if ((instr & 0xF000) == 0xD000) // DRW Vx, Vy, nibble (temporary)
-	{
-		uint64_t xi, yi, x, y, n;
-		xi = (instr & 0x0F00) >> 8;
-		yi = (instr & 0x00F0) >> 4;
-
-		x = context.V[xi];
-		y = context.V[yi];
-
-		n = instr & 0xF;
-
-		context.V[15] = 0;
-		for (int i = 0; i < n; i++)
-		{
-			uint8_t src = context.memory[context.I + i];
-			for (int j = 0; j < 8; j++)
-			{
-				uint8_t bit = (src << j) & 0b10000000;
-				if (bit && (context.gfx[(x+j)%WIDTH][32 - (y+i)%HEIGHT]))
-				{
-					context.V[15] = 1;
-				}
-
-				context.gfx[(x+j)%WIDTH][31 - (y+i)%HEIGHT] ^= bit;
-			}
-		}
-		context.pc += 2;
-
-	}
-
 }
 
