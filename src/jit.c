@@ -254,7 +254,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			X64(0x66); X64(0x03); X64(0x04);
 			X64(0x25);
 			EMIT_32LE(&context.I);
-			// mov bh, 32
+			// mov bh, 31
 			X64(0xb7); X64(0x1f);
 			// sub bh, byte ptr [&context.V[ins.y]]
 			X64(0x2a); X64(0x3c); X64(0x25);
