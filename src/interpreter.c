@@ -11,6 +11,11 @@ void interpret(uint16_t instr)
 	else if ((instr & 0xF000) == 0x1000) // JP addr
 	{
 		context.pc = addr;
+/*                printf("V0: %x\n", context.V[0]);
+                printf("V1: %x\n", context.V[1]);
+                printf("I: %x\n", context.I);
+                printf("PC: %x\n", context.pc);    
+*/
 	}
         else if ((instr & 0xF000) == 0x2000) // CALL addr
         {
