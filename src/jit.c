@@ -93,50 +93,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// jne -17 (previous 3 instr)
 			X64(0x75); X64(0xed);
 		}
-		else if ((current_instr & 0xF000) == 0x3000) // SE Vx, byte
-		{
-/*			if ((source_i + 2) != n*2)
-			{
-
-				// mov al, ins.kk
-				X64(0xb0); X64(ins.kk);
-				// cmp al, byte ptr [&context.V[ins.x]]
-				CMP_AL_BYTE_PTR(&context.V[ins.x]);
-				// je 0 (placeholder)
-			
-				X64(0x74);
-				X64(0); 
-
-				fix_skip = 1;
-			}
-			*/
-		}
-		else if ((current_instr & 0xF000) == 0x4000) // SNE Vx, byte
-                {
-/*                        // mov al, ins.kk
-                        X64(0xb0); X64(ins.kk);
-                        // cmp al, byte ptr [&context.V[ins.x]]
-                        CMP_AL_BYTE_PTR(&context.V[ins.x]);
-                        // jne 0 (placeholder)
-                        X64(0x75);
-                        X64(0);
-
-                        fix_skip = 1;
-			*/
-                }
-		else if ((current_instr & 0xF000) == 0x5000) // SE Vx, Vy
-		{
-/*			// mov al, byte ptr [&context.V[ins.x]]
-			MOV_AL_BYTE_PTR(&context.V[ins.x])
-			// cmp al, byte ptr [&context.V[ins.y]]
-			CMP_AL_BYTE_PTR(&context.V[ins.y]);
-                        // je 0 (placeholder)
-			X64(0x74);
-			X64(0); 
-
-			fix_skip = 1;
-			*/
-		}
 		else if ((current_instr & 0xF000) == 0x6000) // LD Vx, byte
 		{
 			// mov al, ins.kk
@@ -250,20 +206,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x25);
                         EMIT_32LE(&context.V[15]);
                 }
-
-		else if ((current_instr & 0xF000) == 0x9000) // SNE Vx, Vy
-		{
-/*                        // mov al, byte ptr [&context.V[ins.x]]
-                        MOV_AL_BYTE_PTR(&context.V[ins.x])
-                        // cmp al, byte ptr [&context.V[ins.y]]
-                        CMP_AL_BYTE_PTR(&context.V[ins.y]);
-                        // jne 0 (placeholder)
-                        X64(0x75);
-                        X64(0); 
-
-                        fix_skip = 1;
-			*/
-		}
 
                 else if ((current_instr & 0xF000) == 0xA000) // LD I, addr
 		{
