@@ -2,8 +2,6 @@
 
 #define KEY(a) (key == a)
 
-
-
 void keyboardUp(uint8_t key, int x, int y)
 {
         if (key == '3') context.keys[0] = 0;
