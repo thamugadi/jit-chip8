@@ -44,8 +44,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	int source_i;
 	int dest_i = 0;
 
-	int fix_skip = 0;
-
 	int emitted_instr = 0;
 
         X64(0x55); //push rbp
@@ -307,30 +305,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// jnz loop
 			X64(0x75); X64(0xc2);
 		}
-		else if ((current_instr & 0xF000) == 0xE000 && (current_instr & 0xFF) == 0x9E)
-		{ // SKP Vx
-			// mov al, byte ptr [&context.keys[ins.x]]
-			MOV_AL_BYTE_PTR(&context.keys[ins.x]);
-			// cmp al, 1
-			X64(0x3c); X64(0x01);
-			// je 0 (placeholder)
-			X64(0x74);
-			X64(0);
-
-                        fix_skip = 1;
-		}
-		else if ((current_instr & 0xF000) == 0xE000 && (current_instr & 0xFF) == 0xA1)
-		{ // SKNP Vx
-                        // mov al, byte ptr [&context.keys[ins.x]]
-                        MOV_AL_BYTE_PTR(&context.keys[ins.x]);
-                        // cmp al, 0              
-                        X64(0x3c); X64(0x00);
-                        // je 0 (placeholder)
-                        X64(0x74);
-                        X64(0);
-                	
-                        fix_skip = 1;
-		}
 		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x07)
 		{ // LD Vx, DT
 			// mov al, byte ptr [&context.dt]
@@ -559,13 +533,6 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			printf("error: unsupported opcode: %x\n", current_instr);
 			printf("at %x\n", context.pc+source_i);
 			exit(1);
-		}
-
-		if (fix_skip == 1) fix_skip++;
-		else if (fix_skip == 2)
-		{
-			code[dest_i - emitted_instr - 1] = emitted_instr; // fixing jump
-			fix_skip = 0;
 		}
 	}
 
