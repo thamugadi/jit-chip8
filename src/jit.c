@@ -75,8 +75,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 
 		if (current_instr== 0x00E0) // CLS
 		{
-			// xor rax, rax
-			X64(0x48); X64(0x31); X64(0xc0);
+			// xor eax, eax
+			X64(0x31); X64(0xc0);
 			// xor rbx, rbx
                         X64(0x48); X64(0x31); X64(0xdb);
 			// mov qword [rax+&context.gfx], rbx
@@ -257,8 +257,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x0A)
 		{ // LD Vx, K
 		  	// begin:
-			// xor rax, rax
-			X64(0x48); X64(0x31); X64(0xc0);
+			// xor eax, eax
+			X64(0x31); X64(0xc0);
 			// mov bl, 1
 			X64(0xb3); X64(0x01);
 			// loop:
@@ -326,8 +326,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x29)
                 { // LD F, Vx
 		  	uint8_t* ptr = &context.I;
-		  	// xor rax, rax
-			X64(0x48); X64(0x31); X64(0xc0);
+		  	// xor eax, eax
+			X64(0x31); X64(0xc0);
 			// mov al, byte ptr [&context.V[ins.x]]
 			X64(0x8a); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
@@ -347,8 +347,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                 { // LD B, Vx
 		  // use F6 div
 			uint8_t* ptr = &context.I;
-			// xor rax, rax
-			X64(0x48); X64(0x31); X64(0xc0);
+			// xor eax, eax
+			X64(0x31); X64(0xc0);
 			// xor rcx, rcx
 			X64(0x48); X64(0x31); X64(0xc9);
 			// mov dl, byte ptr [&context.V[ins.x]]
@@ -416,8 +416,8 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// add rcx, &context.memory
                         X64(0x48); X64(0x81); X64(0xc1);
                         EMIT_32LE(&context.memory);
-		  	// xor rax, rax
-			X64(0x48); X64(0x31); X64(0xc0);
+		  	// xor eax, eax
+			X64(0x31); X64(0xc0);
 			// loop:
 			// cmp rax, ins.x
 			X64(0x48); X64(0x3d);
