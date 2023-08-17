@@ -51,13 +51,13 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	__SUB_RSP(0x40);
 
 	// push rax
-	X64(0x50);
+//	X64(0x50);
 	// push rbx
 	X64(0x53);
 	// push rcx
-	X64(0x51);
+//	X64(0x51);
 	// push rdx
-	X64(0x52);
+//	X64(0x52);
 
 	for (source_i = 0; source_i < n*2; source_i+=2)
 	{
@@ -471,13 +471,13 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	}
 
 	//pop rdx
-	X64(0x5a);
+//	X64(0x5a);
 	//pop rcx
-	X64(0x59);
+//	X64(0x59);
 	//pop rbx
 	X64(0x5b);
 	//pop rax
-	X64(0x58);
+//	X64(0x58);
 
         X64(0xC9); // leave
 	X64(0xC3); // ret
