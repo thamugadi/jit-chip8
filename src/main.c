@@ -1,11 +1,13 @@
 #include <chip8.h>
 #include <GL/glut.h>
-
+#define PERIOD 0
 #define DRAW_POS(px,py) \
         glVertex2i(px, py); \
         glVertex2i(px+PIXELSIZE, py); \
         glVertex2i(px+PIXELSIZE, py+PIXELSIZE); \
         glVertex2i(px, py+PIXELSIZE);
+
+int cycle = 0;
 
 uint8_t font[0x50] =
 { 
@@ -34,13 +36,6 @@ void display()
         glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_QUADS);
 
-	emulate_basic_block();
-        if (context.dt)
-        {                                       
-                context.dt--;
-        }
-
-
         for (int i = 0; i < WIDTH; i++)
         {
                 for (int j = 0; j < HEIGHT; j++)
@@ -60,6 +55,25 @@ void initGL()
 {
         gluOrtho2D(0, WIDTH * PIXELSIZE, 0, HEIGHT * PIXELSIZE);
         glMatrixMode(GL_MODELVIEW);
+}
+
+void timer(int value)
+{
+        if (context.dt)
+        {
+                context.dt--;  
+        }
+	emulate_basic_block();
+	if (!cycle)
+	{
+		glutPostRedisplay();
+		//cycle = CYCLE;
+	}
+	else
+	{
+		cycle--;
+	}
+	glutTimerFunc(PERIOD, timer, 0);
 }
 
 int main(int argc, char** argv)
@@ -120,6 +134,7 @@ int main(int argc, char** argv)
 
 	initGL();
 
+	glutTimerFunc(PERIOD, timer, 0);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboardDown);
     	glutKeyboardUpFunc(keyboardUp);
