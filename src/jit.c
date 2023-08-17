@@ -170,7 +170,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			//shr byte ptr [&context.V[ins.x]], 1
 			X64(0xd0); X64(0x2c); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
-			//setb byte ptr [&context.V[15]]
+			//setc byte ptr [&context.V[15]]
 			X64(0x0f); X64(0x92); X64(0x04);
 			X64(0x25);
 			EMIT_32LE(&context.V[15]);
