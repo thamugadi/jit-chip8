@@ -45,11 +45,11 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	int dest_i = 0;
 
 	int emitted_instr = 0;
-
-        X64(0x55); //push rbp
+/*
+	X64(0x55); //push rbp
         X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
 	__SUB_RSP(0x40);
-
+*/
 	// push rax
 //	X64(0x50);
 	// push rbx
@@ -479,7 +479,7 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 	//pop rax
 //	X64(0x58);
 
-        X64(0xC9); // leave
+//      X64(0xC9); // leave
 	X64(0xC3); // ret
 
 	return code;
