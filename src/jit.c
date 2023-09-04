@@ -36,28 +36,35 @@ jmp $
 #define STOP X64(0xeb); X64(0xfe);
 struct instr_s ins;
 
-uint8_t* jit_recompile(uint8_t* instr, int n)
-{
+/* instructions involving reading chip8 memory and not 7 bytes long:
+ * 88 21 
+ * 8a 98 (32LE)
+ * 88 1c 01
+ * 8a 1c 08
+ * 88 98 (32LE)
+ * 
+*/
 
-	uint8_t* code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+void segfault_handler(int sig_n, siginfo_t *info, void *ctx)
+{
+	if (!exec_jit)
+	{
+		printf("Segmentation fault\n");
+		exit(-1);
+	}
+	mprotect(&context.memory, MEMSIZE, PROT_READ | PROT_WRITE);
+	exit(0);
+}
+
+void jit_recompile(uint8_t* code, uint8_t* instr, int n)
+{
 
 	int source_i;
 	int dest_i = 0;
 
 	int emitted_instr = 0;
-/*
-	X64(0x55); //push rbp
-        X64(0x48); X64(0x89); X64(0xE5); //mov rsp, rbp
-	__SUB_RSP(0x40);
-*/
-	// push rax
-//	X64(0x50);
 	// push rbx
 	X64(0x53);
-	// push rcx
-//	X64(0x51);
-	// push rdx
-//	X64(0x52);
 
 	for (source_i = 0; source_i < n*2; source_i+=2)
 	{
@@ -353,9 +360,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 			// mov ch, byte ptr [&context.I+1]
 			X64(0x8a); X64(0x2c); X64(0x25);
 			EMIT_32LE(ptr+1);
-			// add rcx, &context.memory
+			// add rcx, context.memory
 			X64(0x48); X64(0x81); X64(0xc1);
-			EMIT_32LE(&context.memory);
+			EMIT_32LE(context.memory);
 			// mov al, dl
 			X64(0x88); X64(0xd0);
 			// mov bl, 100
@@ -406,9 +413,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         // mov ch, byte ptr [&context.I+1]
                         X64(0x8a); X64(0x2c); X64(0x25);
                         EMIT_32LE(ptr+1);
-			// add rcx, &context.memory
+			// add rcx, context.memory
                         X64(0x48); X64(0x81); X64(0xc1);
-                        EMIT_32LE(&context.memory);
+                        EMIT_32LE(context.memory);
 		  	// xor eax, eax
 			X64(0x31); X64(0xc0);
 			// loop:
@@ -440,9 +447,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
                         X64(0x8a); X64(0x2c); X64(0x25);
                         EMIT_32LE(ptr+1);
 
-                        // add rcx, &context.memory
+                        // add rcx, context.memory
                         X64(0x48); X64(0x81); X64(0xc1);
-                        EMIT_32LE(&context.memory);
+                        EMIT_32LE(context.memory);
                         // xor rax, rax
                         X64(0x48); X64(0x31); X64(0xc0);
                         // loop:
@@ -470,17 +477,9 @@ uint8_t* jit_recompile(uint8_t* instr, int n)
 		}
 	}
 
-	//pop rdx
-//	X64(0x5a);
-	//pop rcx
-//	X64(0x59);
 	//pop rbx
 	X64(0x5b);
-	//pop rax
-//	X64(0x58);
 
-//      X64(0xC9); // leave
-	X64(0xC3); // ret
-
-	return code;
+	// ret
+	X64(0xC3);
 }

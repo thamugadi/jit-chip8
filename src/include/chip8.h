@@ -1,5 +1,9 @@
-#include <stdint.h>
 #include <stdio.h>
+#define __USE_GNU
+#include <stdint.h>
+#include <signal.h>
+#include <execinfo.h>
+#include <ucontext.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <string.h>
@@ -13,6 +17,8 @@
 #define PIXELSIZE 1
 
 #define MEMSIZE 0x1000
+
+extern int exec_jit;
 
 extern void initGL();
 extern void display();
@@ -31,7 +37,9 @@ void emulate_basic_block();
 
 void interpret(uint16_t instr);
 
-uint8_t* jit_recompile(uint8_t* instr, int n);
+void jit_recompile(uint8_t* code, uint8_t* instr, int n);
+
+void segfault_handler(int sig_n, siginfo_t *info, void *ctx);
 
 struct compiled_s
 {

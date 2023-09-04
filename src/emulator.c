@@ -9,8 +9,9 @@ uint64_t recompiled_block = 0;
 
 void emulate_basic_block()
 {
-	uint8_t* recomp;
 	struct access_cache_s cache_a;
+
+	uint8_t* code;
 
         int n=0;
 
@@ -24,11 +25,11 @@ void emulate_basic_block()
 		if (cache_a.present)
 		{
 			n = cache_a.n;
-			recomp = cache_a.addr;
+			code = cache_a.addr;
 
 			printf("Cached block at: %x\n", context.pc);
 
-			void (*f)() = recomp;
+			void (*f)() = code;
 			f();
 		}
 		else
@@ -38,10 +39,11 @@ void emulate_basic_block()
                         	n++; // instructions to recompile
                 	}
 			printf("Compiling block at: %x\n", context.pc);
-                	recomp = jit_recompile(&context.memory[context.pc], n);
-                        void (*f)() = recomp;
+			code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                	jit_recompile(code, &context.memory[context.pc], n);
+                        void (*f)() = code; 
                         f();
-			update_cache(recomp, n, context.pc);
+			update_cache(code, n, context.pc);
 		}
 
 		recompiled_block++;
