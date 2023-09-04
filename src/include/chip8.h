@@ -50,7 +50,7 @@ struct compiled_s
 
 struct context_s
 {
-        uint8_t memory[MEMSIZE];
+        uint8_t* memory;
         uint16_t stack[0x10];
 
         uint8_t sp; 

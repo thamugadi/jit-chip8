@@ -78,6 +78,7 @@ void timer(int value)
 
 int main(int argc, char** argv)
 {
+	context.memory = mmap(0, 0x1000, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	memset(context.memory, 0, 2 * 0x500);
 
 	if (argc < 2)
