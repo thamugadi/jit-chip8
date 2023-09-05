@@ -8,6 +8,8 @@
  * 88 98 (32LE)
  * 
 */
+/* other instructions involving reading chip8 memory are all 7 bytes long.*/
+/* * used registers: rax, rbx, rcx, rdx, r10 */
 
 void segfault_handler(int sig_n, siginfo_t *info, void *ctx)
 {
