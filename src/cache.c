@@ -26,17 +26,19 @@ void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t bytes)
         }
 }
 
-struct access_cache_s access_cache(uint16_t pc_addr)
+struct access_cache_s access_cache(uint16_t pc_addr, int update)
 {
         for (int i = 0; i < CACHE_SIZE; i++)
         {
                 if (cache[i].pc == pc_addr) // hit
                 {
-                        cache[i].freq++;
+			if (update)
+			{
+				cache[i].freq++;
+			}
                         return  (struct access_cache_s)
 			  {1, cache[i].n, cache[i].addr, cache[i].emitted_bytes}; 
                 }
         }
 	return (struct access_cache_s){0,0,0,0};
 }
-

@@ -99,7 +99,7 @@ struct access_cache_s
 	uint64_t emitted_bytes;
 };
 
-struct access_cache_s access_cache(uint16_t pc);
+struct access_cache_s access_cache(uint16_t pc, int update);
 
 void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t emitted_bytes);
 

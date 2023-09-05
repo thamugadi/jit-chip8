@@ -21,7 +21,7 @@ void emulate_basic_block()
         }
      	else
 	{
-		cache_a = access_cache(context.pc);
+		cache_a = access_cache(context.pc, 1);
 		if (cache_a.present)
 		{
 			n = cache_a.n;
@@ -29,7 +29,7 @@ void emulate_basic_block()
 
 			printf("Cached block at: %x\n", context.pc);
 
-			g_emitted_bytes = 0;
+			g_emitted_bytes = cache_a.emitted_bytes;
 			void (*f)() = code;
 			f();
 		}
