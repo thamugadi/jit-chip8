@@ -1,9 +1,5 @@
 #include <chip8.h>
 
-#define __SUB_RSP(n) X64(0x48) X64(0x81) X64(0xEC) \
-		   X64((uint8_t)(n&0xff)) X64((uint8_t)(n>>8)&0xff) \
-		   X64((uint8_t)(n>>16)&0xff) X64(0x00);
-
 #define X64(a) code[dest_i++] = a; emitted_instr++;
 
 #define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4; emitted_instr+=4;
@@ -38,7 +34,6 @@ struct instr_s ins;
 
 void jit_recompile(uint8_t* code, uint8_t* instr, int n)
 {
-
 	int source_i;
 	int dest_i = 0;
 
