@@ -32,12 +32,13 @@ extern void keyboardDown(uint8_t key, int x, int y);
 extern struct context_s context;
 extern uint64_t recompiled_block;
 extern int c;
+extern uint64_t g_emitted_bytes;
 
 void emulate_basic_block();
 
 void interpret(uint16_t instr);
 
-void jit_recompile(uint8_t* code, uint8_t* instr, int n);
+int jit_recompile(uint8_t* code, uint8_t* instr, int n);
 
 void segfault_handler(int sig_n, siginfo_t *info, void *ctx);
 
@@ -87,6 +88,7 @@ struct cache_entry
 	uint16_t pc;
 	uint64_t freq;
 	uint64_t n;
+	uint64_t emitted_bytes;
 };
 
 struct access_cache_s
@@ -94,10 +96,11 @@ struct access_cache_s
 	int present;
 	int n;
 	uint8_t* addr;
+	uint64_t emitted_bytes;
 };
 
 struct access_cache_s access_cache(uint16_t pc);
 
-void update_cache(uint8_t* addr, int n, uint16_t pc);
+void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t emitted_bytes);
 
 extern uint8_t font[0x50];

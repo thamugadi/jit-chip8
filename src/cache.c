@@ -2,11 +2,11 @@
 
 struct cache_entry cache[CACHE_SIZE];
 
-void update_cache(uint8_t* addr, int n, uint16_t pc)
+void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t bytes)
 {
         if (recompiled_block < CACHE_SIZE)
         {
-                cache[recompiled_block] = (struct cache_entry){addr, pc, 0, n};
+                cache[recompiled_block] = (struct cache_entry){addr, pc, 0, n, bytes};
         }
         else
         {
@@ -22,7 +22,7 @@ void update_cache(uint8_t* addr, int n, uint16_t pc)
                         }
                 }
 		munmap(cache[index].addr, (cache[index].n) * MAX_EMITTED);
-                cache[index] = (struct cache_entry){addr, pc, 0, n};
+                cache[index] = (struct cache_entry){addr, pc, 0, n, bytes};
         }
 }
 
@@ -33,9 +33,10 @@ struct access_cache_s access_cache(uint16_t pc_addr)
                 if (cache[i].pc == pc_addr) // hit
                 {
                         cache[i].freq++;
-                        return (struct access_cache_s){1, cache[i].n, cache[i].addr}; 
+                        return  (struct access_cache_s)
+			  {1, cache[i].n, cache[i].addr, cache[i].emitted_bytes}; 
                 }
         }
-	return (struct access_cache_s){0,0,0};
+	return (struct access_cache_s){0,0,0,0};
 }
 

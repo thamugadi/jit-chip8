@@ -4,9 +4,9 @@
 #define current(o) (uint16_t)(((int)context.memory[context.pc+o] << 8) | (int)context.memory[context.pc+1+o])
 
 struct context_s context;
-
+void* current_basic_block;
 uint64_t recompiled_block = 0;
-
+uint64_t g_emitted_bytes; 
 void emulate_basic_block()
 {
 	struct access_cache_s cache_a;
@@ -29,6 +29,7 @@ void emulate_basic_block()
 
 			printf("Cached block at: %x\n", context.pc);
 
+			g_emitted_bytes = 0;
 			void (*f)() = code;
 			f();
 		}
@@ -39,16 +40,17 @@ void emulate_basic_block()
                         	n++; // instructions to recompile
                 	}
 			printf("Compiling block at: %x\n", context.pc);
-			code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-                	jit_recompile(code, &context.memory[context.pc], n);
+			current_basic_block = context.pc;
 
+			code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                	g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 //TODO
-//			mprotect(context.memory, 0x1000, 0);
-                        void (*f)() = code; 
+//			mprotect(context.memory, 0x1000, PROT_NONE);
+                        void (*f)() = code;
 			exec_jit = 1;
                         f();
 			exec_jit = 0;
-			update_cache(code, n, context.pc);
+			update_cache(code, n, context.pc, g_emitted_bytes);
 		}
 
 		recompiled_block++;

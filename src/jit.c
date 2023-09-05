@@ -1,9 +1,9 @@
 #include <chip8.h>
 
-#define X64(a) code[dest_i++] = a; emitted_instr++;
+#define X64(a) code[dest_i++] = a; emitted_bytes++;
 
-#define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4; emitted_instr+=4;
-#define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8; emitted_instr+=8;
+#define EMIT_32LE(a) *((uint32_t*)(&code[dest_i])) = a; dest_i+=4; emitted_bytes+=4;
+#define EMIT_64LE(a) *((uint64_t*)(&code[dest_i])) = a; dest_i+=8; emitted_bytes+=8;
 #define MOV_AL_BYTE_PTR(a) X64(0x8a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 #define CMP_AL_BYTE_PTR(a) X64(0x3a); X64(0x04); X64(0x25); EMIT_32LE(a); // 7
 
@@ -32,12 +32,12 @@ jmp $
 #define STOP X64(0xeb); X64(0xfe);
 struct instr_s ins;
 
-void jit_recompile(uint8_t* code, uint8_t* instr, int n)
+int jit_recompile(uint8_t* code, uint8_t* instr, int n) 
 {
 	int source_i;
 	int dest_i = 0;
 
-	int emitted_instr = 0;
+	int emitted_bytes = 0;
 	// push rbx
 	X64(0x53);
 
@@ -47,7 +47,7 @@ void jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			(uint16_t)(instr[source_i] << 8) | (uint16_t)(instr[source_i+1]);
 		printf("Compiling instruction: %x at %x\n", current_instr, context.pc + source_i);
 
-		emitted_instr = 0;
+		emitted_bytes = 0;
 		
 		ins.nnn = current_instr & 0xFFF;
 		ins.n = current_instr & 0xF;
@@ -55,7 +55,7 @@ void jit_recompile(uint8_t* code, uint8_t* instr, int n)
 		ins.y = (current_instr & 0x00F0) >> 4;
                 ins.kk = current_instr & 0x00FF;
 
-		if (current_instr== 0x00E0) // CLS
+		if (current_instr == 0x00E0) // CLS
 		{
 			// xor eax, eax
 			X64(0x31); X64(0xc0);
@@ -462,4 +462,6 @@ void jit_recompile(uint8_t* code, uint8_t* instr, int n)
 
 	// ret
 	X64(0xC3);
+
+	return emitted_bytes;
 }
