@@ -40,8 +40,6 @@ void interpret(uint16_t instr);
 
 int jit_recompile(uint8_t* code, uint8_t* instr, int n);
 
-void segfault_handler(int sig_n, siginfo_t *info, void *ctx);
-
 struct compiled_s
 {
         int size;

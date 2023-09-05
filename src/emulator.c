@@ -42,14 +42,14 @@ void emulate_basic_block()
 			printf("Compiling block at: %x\n", context.pc);
 			current_basic_block = context.pc;
 
-			code = mmap(0, n*MAX_EMITTED, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+			code =
+			  mmap(0, n*MAX_EMITTED, 
+			    PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
                 	g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
-//TODO
-//			mprotect(context.memory, 0x1000, PROT_NONE);
+
                         void (*f)() = code;
-			exec_jit = 1;
                         f();
-			exec_jit = 0;
 			update_cache(code, n, context.pc, g_emitted_bytes);
 		}
 
