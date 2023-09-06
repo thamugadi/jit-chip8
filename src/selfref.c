@@ -16,7 +16,7 @@ void mem_handler(uint8_t* addr)
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
 
-	// rbp + 8
+	// saved rip at rbp + 8
 	void** saved_rip_ptr;
 	asm("lea %0, [rbp+8]" : "=r" (saved_rip_ptr));
 	void* saved_rip = __builtin_return_address(0);
@@ -73,7 +73,6 @@ void mem_handler(uint8_t* addr)
                         munmap(basic_block, n * MAX_EMITTED);
 
 			*saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
-			// TODO: patch RIP
 		}
 		else
 		{
