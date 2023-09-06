@@ -97,10 +97,18 @@ struct access_cache_s
 	int n;
 	uint8_t* addr;
 	uint64_t emitted_bytes;
+	uint16_t pc;
 };
 
 struct access_cache_s access_cache(uint16_t pc, int update);
 
+struct access_cache_s access_cache_addr(uint8_t* jit_addr, int update);
+
 void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t emitted_bytes);
 
+void update_basic_block(uint16_t pc_addr, uint8_t* new_addr);
+
 extern uint8_t font[0x50];
+
+extern struct cache_entry cache[CACHE_SIZE];
+
