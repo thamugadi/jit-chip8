@@ -50,7 +50,7 @@ void mem_handler(uint8_t* addr)
 		{
 			void* offset_rip = saved_rip - (void*)(cache[i].addr);
                         code =
-                          mmap(0, n*MAX_EMITTED+0x100, 
+                          mmap(0, n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 			
@@ -79,7 +79,7 @@ void mem_handler(uint8_t* addr)
 		else
 		{
                         code =
-                          mmap(0, n*MAX_EMITTED+0x100, 
+                          mmap(0, n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 			cache[i].addr = code;

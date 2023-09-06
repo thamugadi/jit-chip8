@@ -356,6 +356,11 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+                        // mov r11, &mem_handler
+                        X64(0x49); X64(0xc7); X64(0xc3);
+                        EMIT_32LE(&mem_handler);
+                        // call r11
+                        X64(0x41); X64(0xff); X64(0xd3);
 			// inc rcx
 			X64(0x48); X64(0xff); X64(0xc1);
 			// xor ax, ax
@@ -370,6 +375,11 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+                        // mov r11, &mem_handler
+                        X64(0x49); X64(0xc7); X64(0xc3);
+                        EMIT_32LE(&mem_handler);
+                        // call r11
+                        X64(0x41); X64(0xff); X64(0xd3);
 			// inc rcx
 			X64(0x48); X64(0xff); X64(0xc1);
 			// xor ax, ax
@@ -380,6 +390,11 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+                        // mov r11, &mem_handler
+                        X64(0x49); X64(0xc7); X64(0xc3);
+                        EMIT_32LE(&mem_handler);
+                        // call r11
+                        X64(0x41); X64(0xff); X64(0xd3);
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x55)
                 { // LD [I], Vx
@@ -471,7 +486,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 		{
 			printf("error: unsupported opcode: %x\n", current_instr);
 			printf("at %x\n", context.pc+source_i);
-			exit(1);
+			X64(0x90);
 		}
 	}
 

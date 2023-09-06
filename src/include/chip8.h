@@ -8,7 +8,7 @@
 #include <sys/mman.h>
 #include <string.h>
 
-#define MAX_EMITTED 4096 
+#define MAX_EMITTED 0x10000 
 
 #define CACHE_SIZE 12 
 
