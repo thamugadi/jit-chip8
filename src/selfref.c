@@ -16,6 +16,8 @@ void mem_handler(uint8_t* addr)
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
 
+	void* saved_rip;
+
 	uint8_t* basic_block;
 	uint64_t basic_block_size;
 	uint64_t basic_block_offset;
@@ -24,7 +26,8 @@ void mem_handler(uint8_t* addr)
 	uint8_t* code;
 
 	int in_cache = 0;
-        for (int i = 0; i < CACHE_SIZE; i++)
+	int i;
+        for (i = 0; i < CACHE_SIZE; i++)
         {
 		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) <= cache[i].n)
 		{
@@ -34,6 +37,7 @@ void mem_handler(uint8_t* addr)
 			basic_block_offset = cache[i].addr + cache[i].emitted_bytes;
 			basic_block_pc = cache[i].pc;
 			n = cache[i].n;
+			break;
 		}
         }
 	if (in_cache)
@@ -43,6 +47,13 @@ void mem_handler(uint8_t* addr)
 		}
 		else
 		{
+                        code =
+                          mmap(0, n*MAX_EMITTED, 
+                            PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
+			cache[i].addr = code;
+			munmap(basic_block, n * MAX_EMITTED);
+			code;
 		}
 	}
 
