@@ -356,6 +356,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+			// mov rdi, rcx
+                        X64(0x48); X64(0x89); X64(0xcf);
                         // mov r11, &mem_handler
                         X64(0x49); X64(0xc7); X64(0xc3);
                         EMIT_32LE(&mem_handler);
@@ -375,6 +377,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+			// mov rdi, rcx
+                        X64(0x48); X64(0x89); X64(0xcf);
                         // mov r11, &mem_handler
                         X64(0x49); X64(0xc7); X64(0xc3);
                         EMIT_32LE(&mem_handler);
@@ -390,6 +394,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0xf6); X64(0xf3);
 			// mov byte ptr [rcx], ah
 			X64(0x88); X64(0x21);
+			// mov rdi, rcx
+			X64(0x48); X64(0x89); X64(0xcf);
                         // mov r11, &mem_handler
                         X64(0x49); X64(0xc7); X64(0xc3);
                         EMIT_32LE(&mem_handler);
