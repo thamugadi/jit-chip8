@@ -16,7 +16,10 @@ void mem_handler(uint8_t* addr)
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
 
-	void* saved_rip;
+	// rbp + 8
+	void** saved_rip_ptr;
+	asm("lea %0, [rbp+8]" : "=r" (saved_rip_ptr));
+	void* saved_rip = __builtin_return_address(0);
 
 	uint8_t* basic_block;
 	uint64_t basic_block_size;
@@ -69,7 +72,8 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
                         munmap(basic_block, n * MAX_EMITTED);
 
-			// TODO: restore registers, call new block with new RIP
+			*saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
+			// TODO: patch RIP
 		}
 		else
 		{
