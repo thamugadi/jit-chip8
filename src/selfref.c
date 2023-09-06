@@ -46,6 +46,7 @@ void mem_handler(uint8_t* addr)
         }
 	if (in_cache)
 	{
+		printf("Invalidating cache entry n°%d\n", i);
 		if (basic_block_pc == context.pc)
 		{
 			void* offset_rip = saved_rip - (void*)(cache[i].addr);

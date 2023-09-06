@@ -484,8 +484,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                 }                                  
 		else
 		{
-			printf("error: unsupported opcode: %x\n", current_instr);
-			printf("at %x\n", context.pc+source_i);
+			printf("Unkown opcode: %x\n at %x. Filling with NOP\n", current_instr, context.pc+source_i);
 			X64(0x90);
 		}
 	}

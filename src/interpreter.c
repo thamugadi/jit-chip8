@@ -6,7 +6,6 @@ void interpret(uint16_t instr)
 	printf("Interpreting: %x at %x\n", instr, context.pc);
 	if (instr == 0x00EE) // RET
 	{
-		printf("%x\n", context.stack[context.sp]);
 		context.pc = context.stack[context.sp];
 		context.sp--;
 	}
