@@ -462,29 +462,24 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                         X64(0x48); X64(0x3d);
                         EMIT_32LE(ins.x);
                         // jg next
-                        X64(0x7f); X64(0x1c);
+                        X64(0x7f); X64(0x12);
                         // mov bl, byte ptr [rax + rcx]
 			X64(0x8a); X64(0x1c); X64(0x08);
                         // lea rdi, [rcx + rax]
                         X64(0x48); X64(0x8d); X64(0x3c);
                         X64(0x08);
-                        // mov r11, &mem_handler
-                        X64(0x49); X64(0xc7); X64(0xc3);
-                        EMIT_32LE(&mem_handler);
-                        // call r11
-                        X64(0x41); X64(0xff); X64(0xd3);
                         // mov byte ptr [rax + &context.V[0]], bl
 			X64(0x88); X64(0x98);
 			EMIT_32LE(&context.V[0]);
                         // inc rax
 			X64(0x48); X64(0xff); X64(0xc0);
                         // jmp loop
-			X64(0xeb); X64(0xea-14);
+			X64(0xeb); X64(0xea-4);
                         // next:
                 }                                  
 		else
 		{
-			printf("Unkown opcode: %x\n at %x. Filling with NOP\n", current_instr, context.pc+source_i);
+			printf("Unkown opcode: %x at %x. Filling with NOP\n", current_instr, context.pc+source_i);
 			X64(0x90);
 		}
 	}
