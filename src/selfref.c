@@ -20,25 +20,30 @@ void mem_handler(uint8_t* addr)
 	uint64_t basic_block_size;
 	uint64_t basic_block_offset;
 	uint64_t n;
+	uint16_t basic_block_pc;
 	uint8_t* code;
 
 	int in_cache = 0;
         for (int i = 0; i < CACHE_SIZE; i++)
         {
-		if (addr >= cache[i].addr && (addr - cache[i].addr) <= cache[i].emitted_bytes)
+		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) <= cache[i].n)
 		{
 			in_cache = 1;
 			basic_block = cache[i].addr;
 			basic_block_size = cache[i].emitted_bytes;
-			basic_block_offset = addr - cache[i].addr;
+			basic_block_offset = cache[i].addr + cache[i].emitted_bytes;
+			basic_block_pc = cache[i].pc;
 			n = cache[i].n;
 		}
         }
 	if (in_cache)
 	{
-	}
-	else
-	{
+		if (basic_block_pc == context.pc)
+		{
+		}
+		else
+		{
+		}
 	}
 
 	asm volatile
