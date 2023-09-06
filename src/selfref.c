@@ -33,7 +33,7 @@ void mem_handler(uint8_t* addr)
 	int diff;
         for (i = 0; i < CACHE_SIZE; i++)
         {
-		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) <= cache[i].n)
+		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) < cache[i].n)
 		{
 			in_cache = 1;
 			basic_block = cache[i].addr;
@@ -72,7 +72,9 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
                         munmap(basic_block, n * MAX_EMITTED);
 
+			printf("%x\n", *saved_rip_ptr);
 			*saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
+			printf("%x\n", *saved_rip_ptr);
 		}
 		else
 		{
@@ -84,6 +86,9 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
 			munmap(basic_block, n * MAX_EMITTED);
 		}
+	}
+	else
+	{
 	}
 
 	asm volatile

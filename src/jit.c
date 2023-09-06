@@ -427,6 +427,9 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x65)
                 { // LD Vx, [I]
 		  	uint8_t* ptr = &context.I;
+                        // mov r10, context.memory
+                        X64(0x49); X64(0xba);
+                        EMIT_64LE(context.memory);
                         // xor rcx, rcx
                         X64(0x48); X64(0x31); X64(0xc9);
                         // mov cl, byte ptr [&context.I]
@@ -435,7 +438,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                         // mov ch, byte ptr [&context.I+1]
                         X64(0x8a); X64(0x2c); X64(0x25);
                         EMIT_32LE(ptr+1);
-                        // add rcx, context.memory
+                        // add rcx, r10
 			X64(0x4c); X64(0x01); X64(0xd1);
                         // xor rax, rax
                         X64(0x48); X64(0x31); X64(0xc0);
