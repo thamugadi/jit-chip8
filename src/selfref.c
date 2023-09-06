@@ -27,6 +27,7 @@ void mem_handler(uint8_t* addr)
 
 	int in_cache = 0;
 	int i;
+	int diff;
         for (i = 0; i < CACHE_SIZE; i++)
         {
 		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) <= cache[i].n)
@@ -44,16 +45,41 @@ void mem_handler(uint8_t* addr)
 	{
 		if (basic_block_pc == context.pc)
 		{
+			void* offset_rip = saved_rip - (void*)(cache[i].addr);
+                        code =
+                          mmap(0, n*MAX_EMITTED+0x100, 
+                            PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
+			
+			for (diff = 0; diff < (uint8_t*)saved_rip-cache[i].addr; diff++)
+			{
+				if (*(code+diff) != *cache[i].addr+diff)
+				{
+					break;
+				}
+			}
+
+			if ((code + diff) < (uint8_t*)saved_rip)
+			{
+				int delta = g_emitted_bytes - cache[i].emitted_bytes;
+				offset_rip += delta;
+			}
+
+                        cache[i].addr = code;
+			cache[i].emitted_bytes = g_emitted_bytes;
+                        munmap(basic_block, n * MAX_EMITTED);
+
+			// TODO: restore registers, call new block with new RIP
 		}
 		else
 		{
                         code =
-                          mmap(0, n*MAX_EMITTED, 
+                          mmap(0, n*MAX_EMITTED+0x100, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 			cache[i].addr = code;
+			cache[i].emitted_bytes = g_emitted_bytes;
 			munmap(basic_block, n * MAX_EMITTED);
-			code;
 		}
 	}
 
