@@ -42,32 +42,3 @@ struct access_cache_s access_cache(uint16_t pc_addr, int update)
         }
 	return (struct access_cache_s){0,0,0,0};
 }
-
-struct access_cache_s access_cache_addr(uint8_t* jit_addr, int update)
-{
-        for (int i = 0; i < CACHE_SIZE; i++)
-        {
-                if (cache[i].addr == jit_addr) // hit
-                {
-                        if (update)
-                        {
-                                cache[i].freq++;
-                        }
-                        return (struct access_cache_s)
-                          {1, cache[i].n, cache[i].addr, cache[i].emitted_bytes, cache[i].pc}; 
-                }
-        }
-        return (struct access_cache_s){0,0,0,0};
-}
-
-
-void update_basic_block(uint16_t pc_addr, uint8_t* new_addr)
-{
-	for (int i = 0; i < CACHE_SIZE; i++)
-	{
-		if (cache[i].pc == pc_addr)
-		{
-			cache[i].addr = new_addr;
-		}
-	}
-}

@@ -28,7 +28,10 @@ void emulate_basic_block()
 			code = cache_a.addr;
 
 			printf("Cached block at: %x\n", context.pc);
-
+			if (!context.pc)
+			{
+				asm("jmp $");
+			}
 			g_emitted_bytes = cache_a.emitted_bytes;
 			void (*f)() = code;
 			f();
