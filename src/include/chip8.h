@@ -40,6 +40,8 @@ void interpret(uint16_t instr);
 
 int jit_recompile(uint8_t* code, uint8_t* instr, int n);
 
+void mem_handler(uint8_t* addr);
+
 struct compiled_s
 {
         int size;

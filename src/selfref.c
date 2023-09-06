@@ -11,4 +11,6 @@
 /* other instructions involving reading chip8 memory are all 7 bytes long.*/
 /* * used registers: rax, rbx, rcx, rdx, r10 */
 
-
+void mem_handler(uint8_t* addr)
+{
+}

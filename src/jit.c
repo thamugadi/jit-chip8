@@ -40,6 +40,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 	int emitted_bytes = 0;
 	// push rbx
 	X64(0x53);
+	// push r11
+	X64(0x41); X64(0x53);
 
 	for (source_i = 0; source_i < n*2; source_i+=2)
 	{
@@ -382,9 +384,9 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x55)
                 { // LD [I], Vx
 		  	uint8_t* ptr = &context.I;
-                        // mov r10, context.memory
-                        X64(0x49); X64(0xba);
-                        EMIT_64LE(context.memory);
+			// mov r10, context.memory
+			X64(0x49); X64(0xba);
+			EMIT_64LE(context.memory);
 		  	// xor rcx, rcx
                         X64(0x48); X64(0x31); X64(0xc9);
                         // mov cl, byte ptr [&context.I]
@@ -402,25 +404,29 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0x48); X64(0x3d);
 			EMIT_32LE(ins.x);
 			// jg next
-			X64(0x7f); X64(0x0e);
+			X64(0x7f); X64(0x1c);
 			// mov bl, byte ptr [rax + &context.V[0]]
 			X64(0x8a); X64(0x98);
 			EMIT_32LE(&context.V[0]);
 			// mov byte ptr [rcx + rax], bl
-			// TODO: handler
 			X64(0x88); X64(0x1c); X64(0x01);
+			// lea rdi, [rcx + rax]
+			X64(0x48); X64(0x8d); X64(0x3c);
+			X64(0x08);
+			// mov r11, &mem_handler
+			X64(0x49); X64(0xc7); X64(0xc3);
+			EMIT_32LE(&mem_handler);
+			// call r11
+			X64(0x41); X64(0xff); X64(0xd3);
 			// inc rax
 			X64(0x48); X64(0xff); X64(0xc0);
 			// jmp loop
-			X64(0xeb); X64(0xea);
+			X64(0xeb); X64(0xea-14);
 			// next:
                 }                                  
                 else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x65)
                 { // LD Vx, [I]
 		  	uint8_t* ptr = &context.I;
-                        // mov r10, context.memory
-                        X64(0x49); X64(0xba);
-                        EMIT_64LE(context.memory);
                         // xor rcx, rcx
                         X64(0x48); X64(0x31); X64(0xc9);
                         // mov cl, byte ptr [&context.I]
@@ -438,17 +444,24 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                         X64(0x48); X64(0x3d);
                         EMIT_32LE(ins.x);
                         // jg next
-                        X64(0x7f); X64(0x0e);
+                        X64(0x7f); X64(0x1c);
                         // mov bl, byte ptr [rax + rcx]
-			// TODO: handler
 			X64(0x8a); X64(0x1c); X64(0x08);
+                        // lea rdi, [rcx + rax]
+                        X64(0x48); X64(0x8d); X64(0x3c);
+                        X64(0x08);
+                        // mov r11, &mem_handler
+                        X64(0x49); X64(0xc7); X64(0xc3);
+                        EMIT_32LE(&mem_handler);
+                        // call r11
+                        X64(0x41); X64(0xff); X64(0xd3);
                         // mov byte ptr [rax + &context.V[0]], bl
 			X64(0x88); X64(0x98);
 			EMIT_32LE(&context.V[0]);
                         // inc rax
 			X64(0x48); X64(0xff); X64(0xc0);
                         // jmp loop
-			X64(0xeb); X64(0xea);
+			X64(0xeb); X64(0xea-14);
                         // next:
                 }                                  
 		else
@@ -459,6 +472,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 		}
 	}
 
+	// pop r11
+	X64(0x41); X64(0x5b);
 	//pop rbx
 	X64(0x5b);
 
