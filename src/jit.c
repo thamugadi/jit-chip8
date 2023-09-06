@@ -407,6 +407,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0x8a); X64(0x98);
 			EMIT_32LE(&context.V[0]);
 			// mov byte ptr [rcx + rax], bl
+			// TODO: handler
 			X64(0x88); X64(0x1c); X64(0x01);
 			// inc rax
 			X64(0x48); X64(0xff); X64(0xc0);
@@ -439,6 +440,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                         // jg next
                         X64(0x7f); X64(0x0e);
                         // mov bl, byte ptr [rax + rcx]
+			// TODO: handler
 			X64(0x8a); X64(0x1c); X64(0x08);
                         // mov byte ptr [rax + &context.V[0]], bl
 			X64(0x88); X64(0x98);
