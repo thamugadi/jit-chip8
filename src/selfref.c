@@ -22,21 +22,25 @@ void mem_handler(uint8_t* addr)
 	void* saved_rip = __builtin_return_address(0);
 
 	uint8_t* basic_block;
-	uint64_t n;
 	uint16_t basic_block_pc;
 	uint8_t* code;
 
 	int in_cache = 0;
 	int i;
 	int diff;
+
+	uint16_t corresponding_pc;
         for (i = 0; i < CACHE_SIZE; i++)
         {
-		if ((int64_t)addr >= (int64_t)cache[i].pc && (int64_t)(addr - cache[i].pc ) < cache[i].n)
+		if (cache[i].addr == 0xffffffffffffffff) break;
+		if ((int64_t)addr >= (int64_t)cache[i].addr && (uint64_t)(addr - cache[i].addr ) < cache[i].emitted_bytes)
 		{
+			asm("jmp $");
+			printf("%x\n", addr);
+			printf("%x\n", cache[i].addr);
 			in_cache = 1;
 			basic_block = cache[i].addr;
 			basic_block_pc = cache[i].pc;
-			n = cache[i].n;
 			break;
 		}
         }
@@ -45,16 +49,17 @@ void mem_handler(uint8_t* addr)
 		printf("Invalidating cache entry n°%d\n", i);
 		if (basic_block_pc == context.pc)
 		{
+			munmap(basic_block, cache[i].n * MAX_EMITTED);
 			int64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
                         code =
-                          mmap(0, n*MAX_EMITTED, 
+                          mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         if ((int64_t)code == -1)
                         {
                                 printf("Failed to allocate memory\n");
                                 exit(-1);
                         }
-                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
+                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], cache[i].n);
 
 			for (diff = 0; diff < (int64_t)saved_rip-(int64_t)cache[i].addr; diff++)
 			{
@@ -72,27 +77,28 @@ void mem_handler(uint8_t* addr)
 
                         cache[i].addr = code;
 			cache[i].emitted_bytes = g_emitted_bytes;
-                        munmap(basic_block, n * MAX_EMITTED);
 
 			printf("%x\n", *saved_rip_ptr);
 			printf("Offset rip: %d\n", offset_rip);
+
 			*saved_rip_ptr = (void*)((int64_t)code + (int64_t)offset_rip);
 			printf("%x\n", *saved_rip_ptr);
 		}
 		else
 		{
+			munmap(basic_block, cache[i].n * MAX_EMITTED);
+			printf("%x", cache[i].n);
                         code =
-                          mmap(0, n*MAX_EMITTED, 
+                          mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         if ((int64_t)code == -1)
                         {
                                 printf("Failed to allocate memory\n");
                                 exit(-1);        
                         }
-                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
+                        g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], cache[i].n);
 			cache[i].addr = code;
 			cache[i].emitted_bytes = g_emitted_bytes;
-			munmap(basic_block, n * MAX_EMITTED);
 		}
 	}
 	else

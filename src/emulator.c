@@ -47,7 +47,7 @@ void emulate_basic_block()
 
 			code =
 			  mmap(0, n*MAX_EMITTED, 
-			    PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+			    PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 			if ((int64_t)code == -1)
 			{
 				printf("Failed to allocate memory");
