@@ -246,6 +246,8 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			X64(0x3c); X64(0x10);
 			// je begin
 			X64(0x74); X64(0xf7);
+			// 
+			STOP;
 			// cmp byte ptr [rax + &context.keys], bl
 			X64(0x38); X64(0x98);
 			EMIT_32LE(&context.keys);
