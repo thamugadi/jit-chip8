@@ -22,8 +22,6 @@ void mem_handler(uint8_t* addr)
 	void* saved_rip = __builtin_return_address(0);
 
 	uint8_t* basic_block;
-	uint64_t basic_block_size;
-	uint64_t basic_block_offset;
 	uint64_t n;
 	uint16_t basic_block_pc;
 	uint8_t* code;
@@ -33,12 +31,10 @@ void mem_handler(uint8_t* addr)
 	int diff;
         for (i = 0; i < CACHE_SIZE; i++)
         {
-		if (addr-context.memory >= cache[i].pc && (addr-context.memory - cache[i].pc ) < cache[i].n)
+		if ((int64_t)addr >= (int64_t)cache[i].pc && (int64_t)(addr - cache[i].pc ) < cache[i].n)
 		{
 			in_cache = 1;
 			basic_block = cache[i].addr;
-			basic_block_size = cache[i].emitted_bytes;
-			basic_block_offset = cache[i].addr + cache[i].emitted_bytes;
 			basic_block_pc = cache[i].pc;
 			n = cache[i].n;
 			break;
@@ -49,13 +45,13 @@ void mem_handler(uint8_t* addr)
 		printf("Invalidating cache entry n°%d\n", i);
 		if (basic_block_pc == context.pc)
 		{
-			void* offset_rip = saved_rip - (void*)(cache[i].addr);
+			int64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
                         code =
                           mmap(0, n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 			
-			for (diff = 0; diff < (uint8_t*)saved_rip-cache[i].addr; diff++)
+			for (diff = 0; diff < (int64_t)saved_rip-(int64_t)cache[i].addr; diff++)
 			{
 				if (*(code+diff) != *cache[i].addr+diff)
 				{
@@ -74,7 +70,8 @@ void mem_handler(uint8_t* addr)
                         munmap(basic_block, n * MAX_EMITTED);
 
 			printf("%x\n", *saved_rip_ptr);
-			*saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
+			printf("Offset rip: %d\n", offset_rip);
+			*saved_rip_ptr = (void*)((int64_t)code + (int64_t)offset_rip);
 			printf("%x\n", *saved_rip_ptr);
 		}
 		else

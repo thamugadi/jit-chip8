@@ -2,3 +2,4 @@ bin
 test
 ignored
 TODO
+*.ch8

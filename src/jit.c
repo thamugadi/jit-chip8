@@ -38,6 +38,9 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 	int dest_i = 0;
 
 	int emitted_bytes = 0;
+        X64(0x48); X64(0x81); X64(0xec);
+        EMIT_32LE(0x100);
+
 	// push rbx
 	X64(0x53);
 	// push r11
@@ -494,6 +497,9 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 	X64(0x41); X64(0x5b);
 	//pop rbx
 	X64(0x5b);
+
+        X64(0x48); X64(0x81); X64(0xc4);
+        EMIT_32LE(0x100);
 
 	// ret
 	X64(0xC3);
