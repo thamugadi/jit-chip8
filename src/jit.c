@@ -242,7 +242,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			// mov bl, 1
 			X64(0xb3); X64(0x01);
 			// loop:
-			// mov rdx, ptrMainLoopEvent
+			// mov rdx, &glutMainLoop 
 			X64(0x48); X64(0xba);
 			EMIT_64LE(&glutMainLoop);
 			// call rdx
