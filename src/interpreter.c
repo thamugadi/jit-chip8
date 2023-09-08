@@ -127,11 +127,14 @@ void interpret(uint16_t instr)
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			if (context.keys[i] == 1)
+			if (context.keys[i])
 			{
-					context.V[(instr & 0x0F00) >> 8] = i;
-					context.pc += 2;
-					break;
+				context.V[(instr & 0x0F00) >> 8] = i;
+				context.pc += 2;
+				break;
+			}
+			else
+			{
 			}
 		}
         }
