@@ -20,7 +20,7 @@
 #define PIXELSIZE 1
 
 #define MEMSIZE 0x1000
-
+extern void* ptrMainLoopEvent;
 extern int exec_jit;
 
 extern void initGL();
@@ -28,7 +28,7 @@ extern void display();
 
 extern int wait_keyboard;
 extern int wait_register;
-
+extern void glutMainLoop();
 extern void keyboardUp(uint8_t key, int x, int y);
 extern void keyboardDown(uint8_t key, int x, int y);
 

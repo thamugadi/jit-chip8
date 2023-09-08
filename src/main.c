@@ -9,6 +9,7 @@
 
 int cycle = 0;
 int exec_jit = 0;
+void* ptrMainLoopEvent;
 uint8_t font[0x50] =
 { 
         0xF0, 0x90, 0x90, 0x90, 0xF0,

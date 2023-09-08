@@ -46,10 +46,9 @@ void mem_handler(uint8_t* addr)
         }
 	if (in_cache)
 	{
-		printf("Invalidating cache entry n°%d\n", i);
+		printf("SMC: Invalidating cache entry n°%d\n", i);
 		if (basic_block_pc == context.pc)
 		{
-			asm("jmp $");
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
 			int64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
                         code =
@@ -87,7 +86,6 @@ void mem_handler(uint8_t* addr)
 		}
 		else
 		{
-			asm("jmp $");
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
 			printf("%x", cache[i].n);
                         code =
