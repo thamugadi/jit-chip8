@@ -49,8 +49,13 @@ void mem_handler(uint8_t* addr)
                         code =
                           mmap(0, n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                        if ((int64_t)code == -1)
+                        {
+                                printf("Failed to allocate memory\n");
+                                exit(-1);
+                        }
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
-			
+
 			for (diff = 0; diff < (int64_t)saved_rip-(int64_t)cache[i].addr; diff++)
 			{
 				if (*(code+diff) != *cache[i].addr+diff)
@@ -79,6 +84,11 @@ void mem_handler(uint8_t* addr)
                         code =
                           mmap(0, n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                        if ((int64_t)code == -1)
+                        {
+                                printf("Failed to allocate memory\n");
+                                exit(-1);        
+                        }
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 			cache[i].addr = code;
 			cache[i].emitted_bytes = g_emitted_bytes;
