@@ -123,6 +123,17 @@ void interpret(uint16_t instr)
 		context.pc += 2;
 
 	}
-
+        else if ((instr & 0xF000) == 0xF000) // LD Vx, K 
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			if (context.keys[i] == 1)
+			{
+					context.V[(instr & 0x0F00) >> 8] = i;
+					context.pc += 2;
+					break;
+			}
+		}
+        }
 }
 

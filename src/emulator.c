@@ -1,6 +1,6 @@
 #include <chip8.h>
 
-#define to_interpret(x) ((x == 0x00EE) || (x >> 12 == 1) || (x >> 12 == 2) || (x >> 12 == 0xB) || (x >> 12 == 3) || (x >> 12 == 4) || (x >> 12 == 5) || (x >> 12 == 9) || ((x >> 12) == 0xE) && (x & 0xff) == 0x9E || ((x >> 12) == 0xE) && (x & 0xff) == 0xA1 || (x >> 12 == 0xD))
+#define to_interpret(x) ((x == 0x00EE) || (x >> 12 == 1) || (x >> 12 == 2) || (x >> 12 == 0xB) || (x >> 12 == 3) || (x >> 12 == 4) || (x >> 12 == 5) || (x >> 12 == 9) || ((x >> 12) == 0xE) && (x & 0xff) == 0x9E || ((x >> 12) == 0xE) && (x & 0xff) == 0xA1 || (x >> 12 == 0xD) || ((x >> 12) == 0xF && ((x & 0xFF) == 0x0A)))
 #define current(o) (uint16_t)(((int)context.memory[context.pc+o] << 8) | (int)context.memory[context.pc+1+o])
 
 struct context_s context;
