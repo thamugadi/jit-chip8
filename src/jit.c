@@ -247,7 +247,6 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			// je begin
 			X64(0x74); X64(0xf7);
 			// 
-			STOP;
 			// cmp byte ptr [rax + &context.keys], bl
 			X64(0x38); X64(0x98);
 			EMIT_32LE(&context.keys);
@@ -256,7 +255,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 			// inc al
 			X64(0xfe); X64(0xc0);
 			// jmp loop
-			X64(0xeb); X64(0xf0);
+			X64(0xeb); X64(0xec);
 			// copy:
 			// mov byte ptr [&context.V[ins.x]], al
 			X64(0x88); X64(0x04); X64(0x25);
