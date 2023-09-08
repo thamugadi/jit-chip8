@@ -1,5 +1,5 @@
 #include <chip8.h>
-
+int wait = -1;
 void interpret(uint16_t instr)
 {
 	uint16_t addr = instr & 0x0FFF;
@@ -125,16 +125,30 @@ void interpret(uint16_t instr)
 	}
         else if ((instr & 0xF000) == 0xF000) // LD Vx, K 
 	{
-		for (int i = 0; i < 16; i++)
+		if (wait != -1)
 		{
-			if (context.keys[i])
+			for (int i = 0; i < 16; i++)
 			{
-				context.V[(instr & 0x0F00) >> 8] = i;
-				context.pc += 2;
-				break;
+				if (context.keys[i])
+				{
+					context.V[(instr & 0x0F00) >> 8] = i;
+					wait = i;
+					break;
+				}
+				else
+				{
+				}
+			}
+		}
+		else
+		{
+			if (context.keys[wait])
+			{
 			}
 			else
 			{
+				wait = -1;
+				context.pc += 2;
 			}
 		}
         }
