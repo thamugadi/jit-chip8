@@ -4,6 +4,14 @@ uint64_t regs[5];
 
 void mem_handler(uint8_t* addr)
 {
+        volatile void** saved_rip;
+	asm volatile 
+	(
+		"mov %0, rsp\n\t"
+		: "=r" (saved_rip)
+	);
+	saved_rip += 11;
+
 	asm volatile 
 	(
 		"mov %0, rax\n\t"
@@ -15,10 +23,6 @@ void mem_handler(uint8_t* addr)
 		:
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
-
-	// saved rip at rbp + 8
-	void** saved_rip_ptr;
-	asm("lea %0, [rbp+8]" : "=r" (saved_rip_ptr));
 
 	uint8_t* basic_block;
 	uint16_t basic_block_pc;
@@ -45,10 +49,9 @@ void mem_handler(uint8_t* addr)
 		if (cache[i].mem_address == &context.memory[context.pc])
 		{
 			printf("%llx\n", cache[i].addr);
-			printf("%llx\n", saved_rip_ptr);
+			printf("%llx\n", saved_rip);
 			// should be on the same chunk.
-			asm("jmp $");
-			uint64_t offset_rip = (uint64_t)saved_rip_ptr - (uint64_t)(cache[i].addr);
+			uint64_t offset_rip = (uint64_t)saved_rip - (uint64_t)(cache[i].addr);
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -59,10 +62,6 @@ void mem_handler(uint8_t* addr)
                         }
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], cache[i].n);
 
-			printf("%llx\n", code);
-			printf("%llx\n", cache[i].addr);
-			printf("%llx\n", offset_rip);
-			asm("jmp $");
 			for (diff = 0; diff < offset_rip; diff++)
 			{
 				if (*(code+diff) != *(cache[i].addr+diff))
@@ -70,9 +69,8 @@ void mem_handler(uint8_t* addr)
 					break;
 				}
 			}
-			asm("jmp $");
 
-			if (diff < (uint8_t*)saved_rip_ptr - cache[i].addr)
+			if (diff < (uint8_t*)saved_rip - cache[i].addr)
 			{
 				offset_rip += g_emitted_bytes - cache[i].emitted_bytes;
 			}
@@ -81,12 +79,11 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
 			cache[i].mem_address = addr;
 
-			asm("jmp $");
 			printf("%llx\n", (uint64_t)code);
 			printf("%llx\n", code+offset_rip);
-			saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
+
+			*saved_rip = (void*)((uint64_t)code + (uint64_t)offset_rip);
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
-			asm("jmp $");
 		}
 		else
 		{
@@ -115,9 +112,10 @@ void mem_handler(uint8_t* addr)
 		"mov rbx, %1\n\t"
 		"mov rcx, %2\n\t"
 		"mov rdx, %3\n\t"
-		"mov r10, %4"
+		"mov r10, %4\n\t"
 		:
 		: "m" (regs[0]), "m" (regs[1]), "m" (regs[2]), "m" (regs[3]), "m" (regs[4])
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
+
 }
