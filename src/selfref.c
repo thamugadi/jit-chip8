@@ -19,7 +19,6 @@ void mem_handler(uint8_t* addr)
 	// saved rip at rbp + 8
 	void** saved_rip_ptr;
 	asm("lea %0, [rbp+8]" : "=r" (saved_rip_ptr));
-	void* saved_rip = __builtin_return_address(0);
 
 	uint8_t* basic_block;
 	uint16_t basic_block_pc;
@@ -32,15 +31,8 @@ void mem_handler(uint8_t* addr)
 	uint16_t corresponding_pc;
         for (i = 0; i < CACHE_SIZE; i++)
         {
-/*		printf("%llx\n", addr);
-		printf("%llx\n", cache[i].mem_address);
-		printf("aaaa");
-		exit(0);
-*/		if (addr >= cache[i].mem_address && (addr - cache[i].mem_address) < cache[i].emitted_bytes)
+		if (addr >= cache[i].mem_address && (addr - cache[i].mem_address) < cache[i].n)
 		{
-//			asm("jmp $"); // debug
-			printf("%llx\n", addr);
-			printf("%llx\n", cache[i].mem_address);
 			in_cache = 1;
 			basic_block = cache[i].addr;
 			basic_block_pc = cache[i].pc;
@@ -50,10 +42,13 @@ void mem_handler(uint8_t* addr)
 	if (in_cache)
 	{
 		printf("SMC: Invalidating cache entry n°%d\n", i);
-		if (basic_block_pc == context.pc)
+		if (cache[i].mem_address == &context.memory[context.pc])
 		{
-			uint64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
-
+			printf("%llx\n", cache[i].addr);
+			printf("%llx\n", saved_rip_ptr);
+			// should be on the same chunk.
+			asm("jmp $");
+			uint64_t offset_rip = (uint64_t)saved_rip_ptr - (uint64_t)(cache[i].addr);
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -64,6 +59,10 @@ void mem_handler(uint8_t* addr)
                         }
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], cache[i].n);
 
+			printf("%llx\n", code);
+			printf("%llx\n", cache[i].addr);
+			printf("%llx\n", offset_rip);
+			asm("jmp $");
 			for (diff = 0; diff < offset_rip; diff++)
 			{
 				if (*(code+diff) != *(cache[i].addr+diff))
@@ -71,8 +70,9 @@ void mem_handler(uint8_t* addr)
 					break;
 				}
 			}
+			asm("jmp $");
 
-			if (diff < (uint8_t*)saved_rip - cache[i].addr)
+			if (diff < (uint8_t*)saved_rip_ptr - cache[i].addr)
 			{
 				offset_rip += g_emitted_bytes - cache[i].emitted_bytes;
 			}
@@ -81,7 +81,10 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
 			cache[i].mem_address = addr;
 
-			saved_rip_ptr = (void*)((int64_t)code + (int64_t)offset_rip);
+			asm("jmp $");
+			printf("%llx\n", (uint64_t)code);
+			printf("%llx\n", code+offset_rip);
+			saved_rip_ptr = (void*)((uint64_t)code + (uint64_t)offset_rip);
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
 			asm("jmp $");
 		}

@@ -6,7 +6,7 @@ void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t bytes, uint8_t* me
 {
         if (recompiled_block < CACHE_SIZE)
         {
-                cache[recompiled_block] = (struct cache_entry){addr, pc, 0, n, bytes};
+                cache[recompiled_block] = (struct cache_entry){addr, pc, 0, n, bytes, mem_address};
         }
         else
         {
@@ -40,5 +40,5 @@ struct access_cache_s access_cache(uint16_t pc_addr, int update)
 			  {1, cache[i].n, cache[i].addr, cache[i].emitted_bytes, cache[i].pc, cache[i].mem_address}; 
                 }
         }
-	return (struct access_cache_s){0,0,0,0};
+	return (struct access_cache_s){0,0,0,0,0,0};
 }
