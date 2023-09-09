@@ -38,9 +38,9 @@ void mem_handler(uint8_t* addr)
 		exit(0);
 */		if (addr >= cache[i].mem_address && (addr - cache[i].mem_address) < cache[i].emitted_bytes)
 		{
-			asm("jmp $"); // debug
-			printf("%x\n", addr);
-			printf("%x\n", cache[i].addr);
+//			asm("jmp $"); // debug
+			printf("%llx\n", addr);
+			printf("%llx\n", cache[i].mem_address);
 			in_cache = 1;
 			basic_block = cache[i].addr;
 			basic_block_pc = cache[i].pc;
@@ -52,8 +52,8 @@ void mem_handler(uint8_t* addr)
 		printf("SMC: Invalidating cache entry n°%d\n", i);
 		if (basic_block_pc == context.pc)
 		{
-			munmap(basic_block, cache[i].n * MAX_EMITTED);
-			int64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
+			uint64_t offset_rip = (int64_t)saved_rip - (int64_t)(cache[i].addr);
+
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -64,28 +64,26 @@ void mem_handler(uint8_t* addr)
                         }
                         g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], cache[i].n);
 
-			for (diff = 0; diff < (int64_t)saved_rip-(int64_t)cache[i].addr; diff++)
+			for (diff = 0; diff < offset_rip; diff++)
 			{
-				if (*(code+diff) != *cache[i].addr+diff)
+				if (*(code+diff) != *(cache[i].addr+diff))
 				{
 					break;
 				}
 			}
 
-			if ((code + diff) < (uint8_t*)saved_rip)
+			if (diff < (uint8_t*)saved_rip - cache[i].addr)
 			{
-				int delta = g_emitted_bytes - cache[i].emitted_bytes;
-				offset_rip += delta;
+				offset_rip += g_emitted_bytes - cache[i].emitted_bytes;
 			}
 
                         cache[i].addr = code;
 			cache[i].emitted_bytes = g_emitted_bytes;
+			cache[i].mem_address = addr;
 
-			printf("%x\n", *saved_rip_ptr);
-			printf("Offset rip: %d\n", offset_rip);
-
-			*saved_rip_ptr = (void*)((int64_t)code + (int64_t)offset_rip);
-			printf("%x\n", *saved_rip_ptr);
+			saved_rip_ptr = (void*)((int64_t)code + (int64_t)offset_rip);
+			munmap(basic_block, cache[i].n * MAX_EMITTED);
+			asm("jmp $");
 		}
 		else
 		{
