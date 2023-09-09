@@ -55,7 +55,7 @@ void emulate_basic_block()
 
                 	g_emitted_bytes = jit_recompile(code, &context.memory[context.pc], n);
 
-			update_cache(code, n, context.pc, g_emitted_bytes);
+			update_cache(code, n, context.pc, g_emitted_bytes, &context.memory[context.pc]);
                         void (*f)() = code;
                         f();
 		}

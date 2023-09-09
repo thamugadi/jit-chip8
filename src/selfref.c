@@ -32,7 +32,11 @@ void mem_handler(uint8_t* addr)
 	uint16_t corresponding_pc;
         for (i = 0; i < CACHE_SIZE; i++)
         {
-		if (addr >= cache[i].addr && (addr - cache[i].addr) < cache[i].emitted_bytes)
+/*		printf("%llx\n", addr);
+		printf("%llx\n", cache[i].mem_address);
+		printf("aaaa");
+		exit(0);
+*/		if (addr >= cache[i].mem_address && (addr - cache[i].mem_address) < cache[i].emitted_bytes)
 		{
 			asm("jmp $"); // debug
 			printf("%x\n", addr);

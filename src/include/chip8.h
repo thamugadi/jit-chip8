@@ -92,6 +92,7 @@ struct cache_entry
 	uint64_t freq;
 	uint64_t n;
 	uint64_t emitted_bytes;
+	uint8_t* mem_address;
 };
 
 struct access_cache_s
@@ -101,11 +102,12 @@ struct access_cache_s
 	uint8_t* addr;
 	uint64_t emitted_bytes;
 	uint16_t pc;
+	uint8_t* mem_address;
 };
 
 struct access_cache_s access_cache(uint16_t pc, int update);
 
-void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t emitted_bytes);
+void update_cache(uint8_t* addr, int n, uint16_t pc, uint64_t emitted_bytes, uint8_t* mem_address);
 
 extern uint8_t font[0x50];
 
