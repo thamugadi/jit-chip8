@@ -11,8 +11,6 @@ void mem_handler(uint8_t* addr)
 		: "=r" (saved_rip)
 	);
 	saved_rip += 11;
-	printf("%llx\n", *(uint64_t*)(*saved_rip));
-	asm("jmp $");
 
 	asm volatile 
 	(
@@ -27,7 +25,6 @@ void mem_handler(uint8_t* addr)
 	);
 
 	uint8_t* basic_block;
-	uint16_t basic_block_pc;
 	uint8_t* code;
 
 	int in_cache = 0;
@@ -41,7 +38,6 @@ void mem_handler(uint8_t* addr)
 		{
 			in_cache = 1;
 			basic_block = cache[i].addr;
-			basic_block_pc = cache[i].pc;
 			break;
 		}
         }
@@ -50,9 +46,6 @@ void mem_handler(uint8_t* addr)
 		printf("SMC: Invalidating cache entry n°%d\n", i);
 		if (cache[i].mem_address == &context.memory[context.pc])
 		{
-			printf("%llx\n", cache[i].addr);
-			printf("%llx\n", *saved_rip);
-			// should be on the same chunk.
 			uint64_t offset_rip = (uint64_t)(*saved_rip) - (uint64_t)(cache[i].addr);
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
@@ -103,9 +96,6 @@ void mem_handler(uint8_t* addr)
 			cache[i].addr = code;
 			cache[i].emitted_bytes = g_emitted_bytes;
 		}
-	}
-	else
-	{
 	}
 
 	asm volatile
