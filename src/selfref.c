@@ -11,6 +11,8 @@ void mem_handler(uint8_t* addr)
 		: "=r" (saved_rip)
 	);
 	saved_rip += 11;
+	printf("%llx\n", *(uint64_t*)(*saved_rip));
+	asm("jmp $");
 
 	asm volatile 
 	(
@@ -49,9 +51,9 @@ void mem_handler(uint8_t* addr)
 		if (cache[i].mem_address == &context.memory[context.pc])
 		{
 			printf("%llx\n", cache[i].addr);
-			printf("%llx\n", saved_rip);
+			printf("%llx\n", *saved_rip);
 			// should be on the same chunk.
-			uint64_t offset_rip = (uint64_t)saved_rip - (uint64_t)(cache[i].addr);
+			uint64_t offset_rip = (uint64_t)(*saved_rip) - (uint64_t)(cache[i].addr);
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
