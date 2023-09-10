@@ -80,19 +80,17 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 		}
 		else if ((current_instr & 0xF000) == 0x6000) // LD Vx, byte
 		{
-			// mov al, ins.kk
-                        X64(0xb0); X64(ins.kk);
-			// mov byte ptr [&context.V[ins.x]], al
-			X64(0x88); X64(0x04); X64(0x25);
+			// mov byte ptr [&context.V[ins.x]], ins.kk 
+			X64(0xc6); X64(0x04); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
+			X64(ins.kk);
 		}
 		else if ((current_instr & 0xF000) == 0x7000) // ADD Vx, byte
 		{
-			// mov al, ins.kk
-                        X64(0xb0); X64(ins.kk);
-			// add byte ptr [&context.V[ins.x]], al
-                        X64(0x00); X64(0x04); X64(0x25);
+			// add byte ptr [&context.V[ins.x]], ins.kk 
+                        X64(0x80); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
+			X64(ins.kk);
 		}
 
 		else if (((current_instr & 0xF000) == 0x8000) && (current_instr & 0xF) == 0)
@@ -216,11 +214,10 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
                         // mov byte ptr [&context.V[ins.x]], al 
                         X64(0x88); X64(0x04); X64(0x25);
                         EMIT_32LE(&context.V[ins.x]);
-			// mov al, ins.kk
-			X64(0xb0); X64(ins.kk);
-			// and byte ptr [&context.V[ins.x]], al
-			X64(0x20); X64(0x04); X64(0x25);
+			// and byte ptr [&context.V[ins.x]], ins.kk 
+			X64(0x80); X64(0x24); X64(0x25);
 			EMIT_32LE(&context.V[ins.x]);
+			X64(ins.kk);
 		}
 		else if ((current_instr & 0xF000) == 0xD000)
 		{ // DRW Vx, Vy, n
