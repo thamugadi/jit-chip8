@@ -74,16 +74,12 @@ void mem_handler(uint8_t* addr)
 			cache[i].emitted_bytes = g_emitted_bytes;
 			cache[i].mem_address = addr;
 
-			printf("%llx\n", (uint64_t)code);
-			printf("%llx\n", code+offset_rip);
-
 			*saved_rip = (void*)((uint64_t)code + (uint64_t)offset_rip);
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
 		}
 		else
 		{
 			munmap(basic_block, cache[i].n * MAX_EMITTED);
-			printf("%x", cache[i].n);
                         code =
                           mmap(0, cache[i].n*MAX_EMITTED, 
                             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -109,5 +105,4 @@ void mem_handler(uint8_t* addr)
 		: "m" (regs[0]), "m" (regs[1]), "m" (regs[2]), "m" (regs[3]), "m" (regs[4])
 		: "rax", "rbx", "rcx", "rdx", "r10"
 	);
-
 }

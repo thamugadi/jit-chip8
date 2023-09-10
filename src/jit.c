@@ -233,41 +233,7 @@ int jit_recompile(uint8_t* code, uint8_t* instr, int n)
 		}
 		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x0A)
 		{ // LD Vx, K
-		  	STOP;
-		  	// begin:
-			// xor eax, eax
-			X64(0x31); X64(0xc0);
-			// mov bl, 1
-			X64(0xb3); X64(0x01);
-			// loop:
-			// sub rsp, 8
-			X64(0x48); X64(0x83); X64(0xec);
-			X64(0x08);
-			// mov rdx, &glutMainLoop 
-			X64(0x48); X64(0xba);
-			EMIT_64LE(&glutMainLoop);
-			// call rdx
-			X64(0xff); X64(0xd2);
-			// add rsp, 8
-			X64(0x48); X64(0x83); X64(0xc4);
-			X64(0x08);
-			// cmp al, 16
-			X64(0x3c); X64(0x10);
-			// je begin
-			X64(0x74); X64(0xe4);
-			// cmp byte ptr [rax + &context.keys], bl
-			X64(0x38); X64(0x98);
-			EMIT_32LE(&context.keys);
-			// je copy
-			X64(0x74); X64(0x04);
-			// inc al
-			X64(0xfe); X64(0xc0);
-			// jmp loop
-			X64(0xeb); X64(0xe0);
-			// copy:
-			// mov byte ptr [&context.V[ins.x]], al
-			X64(0x88); X64(0x04); X64(0x25);
-			EMIT_32LE(&context.V[ins.x]);
+			// to be done
 		}
 		else if ((current_instr & 0xF000) == 0xF000 && (current_instr & 0xFF) == 0x15)
 		{ // LD DT, Vx
