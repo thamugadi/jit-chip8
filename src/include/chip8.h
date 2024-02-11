@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #define __USE_GNU
 #include <stdint.h>
@@ -10,6 +11,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+
+#include <SDL.h> 
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #define MAX_EMITTED 0x10000 
 
@@ -29,8 +34,8 @@ extern void display();
 extern int wait_keyboard;
 extern int wait_register;
 extern void glutMainLoop();
-extern void keyboardUp(uint8_t key, int x, int y);
-extern void keyboardDown(uint8_t key, int x, int y);
+extern void keyboardUp(SDL_Keycode key);
+extern void keyboardDown(SDL_Keycode key);
 
 extern struct context_s context;
 extern uint64_t recompiled_block;

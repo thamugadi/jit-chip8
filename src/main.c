@@ -1,11 +1,14 @@
 #include <chip8.h>
-#include <GL/glut.h>
+
 #define PERIOD 0
-#define DRAW_POS(px,py) \
+#define DRAW_POS(px, py) \
         glVertex2i(px, py); \
         glVertex2i(px+PIXELSIZE, py); \
         glVertex2i(px+PIXELSIZE, py+PIXELSIZE); \
         glVertex2i(px, py+PIXELSIZE);
+
+SDL_Window* window;
+SDL_GLContext gl_context;
 
 int cycle = 0;
 int exec_jit = 0;
@@ -49,7 +52,7 @@ void display()
                 }
         }
         glEnd();
-        glutSwapBuffers();
+        SDL_GL_SwapWindow(window);
 }
 
 void initGL()
@@ -58,66 +61,61 @@ void initGL()
         glMatrixMode(GL_MODELVIEW);
 }
 
-void timer(int value)
+void cpu(int frequency)
 {
+	int i = frequency;
+	while (i--)
+	{
+        	emulate_basic_block();
+	}
         if (context.dt)
         {
-                context.dt--;  
+                context.dt--;
         }
-	emulate_basic_block();
-	if (!cycle)
-	{
-		glutPostRedisplay();
-		//cycle = CYCLE;
-	}
-	else
-	{
-		cycle--;
-	}
-	glutTimerFunc(PERIOD, timer, 0);
+
 }
 
 int main(int argc, char** argv)
 {
-	context.memory = mmap(0, 0x1000, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	memset(context.memory, 0, 2 * 0x500);
-	memset(cache, 0xff, sizeof(struct cache_entry)*CACHE_SIZE);
+        context.memory = mmap(0, 0x1000, 7, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        memset(context.memory, 0, 2 * 0x500);
+        memset(cache, 0xff, sizeof(struct cache_entry)*CACHE_SIZE);
 
-	if (argc < 2)
-	{
-		puts("format : jit-chip8 <chip-8 rom>");
-		return 1;
-	}
+        if (argc < 2)
+        {
+                puts("format : jit-chip8 <chip-8 rom>");
+                return 1;
+        }
 
-	FILE *file = fopen(argv[1], "rb");
+        FILE *file = fopen(argv[1], "rb");
 
-	if (!file)
-	{
-        	fprintf(stderr, "Error: Failed to open file '%s'.\n", argv[1]);
-        	return 2;
-    	}
-	uint8_t buffer[0x800];
-	size_t bytes_read = fread((uint8_t*)(context.memory+0x200), 1, MEMSIZE*2 - 0x200, file);
+        if (!file)
+        {
+                fprintf(stderr, "Error: Failed to open file '%s'.\n", argv[1]);
+                return 2;
+        }
+        uint8_t buffer[0x800];
+        size_t bytes_read = fread((uint8_t*)(context.memory+0x200), 1, MEMSIZE*2 - 0x200, file);
 
-	if (bytes_read == 0x800 && !feof(file)) 
-	{
-        	fprintf(stderr, "Error: File size is larger than %x. \n", MEMSIZE*2 - 0x200);
-        	fclose(file);
-		return 3;
-	}
+        if (bytes_read == 0x800 && !feof(file)) 
+        {
+                fprintf(stderr, "Error: File size is larger than %x. \n", MEMSIZE*2 - 0x200);
+                fclose(file);
+                return 3;
+        }
 
-	fclose(file);
+        fclose(file);
 
-	context.sp = 0;
-	context.pc = 0x200;
-	context.I = 0;
-	context.dt = 0;
-	context.st = 0;
+        context.sp = 0;
+        context.pc = 0x200;
+        context.I = 0;
+        context.dt = 0;
+        context.st = 0;
 
-	memset(context.V, 0, 16);
-	memset(context.gfx, 0, WIDTH * HEIGHT);
-	memset(context.stack, 0, 2 * 16);
-	memset(context.keys, 0, 16);
+        memset(context.V, 0, 16);
+        memset(context.gfx, 0, WIDTH * HEIGHT);
+        memset(context.stack, 0, 2 * 16);
+        memset(context.keys, 0, 16);
 
         uint8_t* memptr = context.memory;
         for (int i = 0; i < 0x50; i++)
@@ -125,24 +123,47 @@ int main(int argc, char** argv)
                 *memptr++ = font[i];
         }
 
+        uint8_t* ptr = context.memory;
+
+        if (SDL_Init(SDL_INIT_VIDEO) < 0)
+        {
+                fprintf(stderr, "SDL_Error: %s\n", SDL_GetError());
+                return 1;
+        }
+
+        window = SDL_CreateWindow("CHIP-8 JIT compiler", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 16*WIDTH * PIXELSIZE, 16*HEIGHT * PIXELSIZE, SDL_WINDOW_OPENGL);
+
+        if (!window)
+        {
+                fprintf(stderr, "SDL_Error: %s\n", SDL_GetError());
+                return 2;
+        }
+
+        gl_context = SDL_GL_CreateContext(window);
+
+        initGL();
+
+        SDL_Event e;
+	int quit = 0;
+	while(!quit)
+	{
 	
-	uint8_t* ptr = context.memory;
+		while (SDL_PollEvent(&e))
+		{
+    			if (e.type == SDL_QUIT) 
+			{
+				quit = 1;
+			}
+    			else if (e.type == SDL_KEYDOWN) keyboardDown(e.key.keysym.sym);
+    			else if (e.type == SDL_KEYUP) keyboardUp(e.key.keysym.sym);
+		}
+		cpu(0x50);
+		display();
+	}
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+        SDL_GL_DeleteContext(gl_context);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
 
-	glutInitWindowSize(WIDTH * PIXELSIZE, HEIGHT * PIXELSIZE);
-	
-	glutCreateWindow("CHIP-8 JIT compiler");
-
-	initGL();
-
-	glutTimerFunc(PERIOD, timer, 0);
-	glutDisplayFunc(display);
-	glutKeyboardFunc(keyboardDown);
-    	glutKeyboardUpFunc(keyboardUp);
-
-	glutIdleFunc(display);
-
-	glutMainLoop();
+        return 0;
 }
