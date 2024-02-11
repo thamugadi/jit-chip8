@@ -157,7 +157,7 @@ int main(int argc, char** argv)
     			else if (e.type == SDL_KEYDOWN) keyboardDown(e.key.keysym.sym);
     			else if (e.type == SDL_KEYUP) keyboardUp(e.key.keysym.sym);
 		}
-		cpu(0x50);
+		cpu(100);
 		display();
 	}
 

@@ -125,32 +125,22 @@ void interpret(uint16_t instr)
 	}
         else if ((instr & 0xF000) == 0xF000) // LD Vx, K 
 	{
-		if (wait != -1)
+		SDL_Event e;
+loop:
+                if (SDL_WaitEvent(&e))
+                {
+                        if (e.type == SDL_KEYUP) keyboardUp(e.key.keysym.sym);
+			else goto loop;
+                }
+
+		for (int i = 0; i < 16; i++)
 		{
-			for (int i = 0; i < 16; i++)
+			if (context.keys[i])
 			{
-				if (context.keys[i])
-				{
-					context.V[(instr & 0x0F00) >> 8] = i;
-					wait = i;
-					break;
-				}
-				else
-				{
-				}
+				context.V[(instr & 0x0F00) >> 8] = i;
 			}
 		}
-		else
-		{
-			if (context.keys[wait])
-			{
-			}
-			else
-			{
-				wait = -1;
-				context.pc += 2;
-			}
-		}
+		context.pc += 2;
         }
 }
 
